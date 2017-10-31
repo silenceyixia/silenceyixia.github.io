@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Silenceyixia_博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Silenceyixia_博客">
+<meta property="og:url" content="http://silenceyixia.github.io/index.html">
+<meta property="og:site_name" content="Silenceyixia_博客">
+<meta property="og:locale" content="zh-CN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Silenceyixia_博客">
+  
+    <link rel="alternate" href="/atom.xml" title="Silenceyixia_博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Silenceyixia_博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">android学习成长之路</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://silenceyixia.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-about-media" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/31/about-media/" class="article-date">
+  <time datetime="2017-10-31T09:49:22.832Z" itemprop="datePublished">2017-10-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<h2 id="android-MediaPlayer使用注意"><a href="#android-MediaPlayer使用注意" class="headerlink" title="android MediaPlayer使用注意"></a>android MediaPlayer使用注意</h2><h5 id="2017-10-31-16-24-14"><a href="#2017-10-31-16-24-14" class="headerlink" title="2017-10-31 16:24:14"></a>2017-10-31 16:24:14</h5><p>###标签： android mediaplayer 视频 音频</p>
+<h6 id="Android的多媒体框架包括支持播放多种常见的媒体类型，使您可以轻松地把音频、视频和图像集成到你的应用。你可以播放音频或视频媒体文件，这些文件是存储在你的应用程序的资源文件中的。应用程序的资源文件可以是文件系统中独立的文件，或通过网络连接获取的一个数据流，所有使用MediaPlayer-APIS的资源文件。"><a href="#Android的多媒体框架包括支持播放多种常见的媒体类型，使您可以轻松地把音频、视频和图像集成到你的应用。你可以播放音频或视频媒体文件，这些文件是存储在你的应用程序的资源文件中的。应用程序的资源文件可以是文件系统中独立的文件，或通过网络连接获取的一个数据流，所有使用MediaPlayer-APIS的资源文件。" class="headerlink" title="Android的多媒体框架包括支持播放多种常见的媒体类型，使您可以轻松地把音频、视频和图像集成到你的应用。你可以播放音频或视频媒体文件，这些文件是存储在你的应用程序的资源文件中的。应用程序的资源文件可以是文件系统中独立的文件，或通过网络连接获取的一个数据流，所有使用MediaPlayer APIS的资源文件。"></a>Android的多媒体框架包括支持播放多种常见的媒体类型，使您可以轻松地把音频、视频和图像集成到你的应用。你可以播放音频或视频媒体文件，这些文件是存储在你的应用程序的资源文件中的。应用程序的资源文件可以是文件系统中独立的文件，或通过网络连接获取的一个数据流，所有使用MediaPlayer APIS的资源文件。</h6><p>##1.<br>注意：如果你通过一个URL来获取一个在线媒体文件，该文件必须能够支持渐进式下载。</p>
+<p>##2.<br>警告：当你使用setDataSource()方法时，必须捕捉非法数据异常和输入输出异常，因为正在被你引用的文件可能不存在在。</p>
+<p>##3.<br>异步准备 - Asynchronous Preparation<br>使用MediaPlayer 的原则很简单。然而，重要的是要记住，有必要将更多的一些东西正确地集成到一个典型的Android应用程序。比如，调用prepare()方法可能需要较长的时间来执行，因为它可能涉及获取和解码媒体数据。因此，例如这样的任何方法，可能需要很长时间执行，要尽量避免在主线程（UI线程）调用它。因为那样很可能会造成ANR，这样用户体验是很不好的。 所以即使你预期资源能快速加载，但是记住任何超过十分之一秒的反应在界面上会造成明显的停顿，将导致给用户的印象是：你的应用程序是缓慢的。<br>为了避免你的UI线程挂起，产生另一个线程准备MediaPlayer 当完成时通知主线程。你可以写自己的线程的逻辑，框架提供prepareAsync() 方法，方便的使用MediaPlayer 。该方法在后台开始准备媒体并立即返回。当媒体准备好了，MediaPlayer.ONPREPAREDLISTENER的ONPREPARED 方法，通过配置setonpreparedlistener()方法来调用。</p>
+<p>##4.<br>状态管理 - Managing State<br>关于MediaPlayer ，你需要记住的另一点是它的状态。即，在你编写自己的代码的时候，必须时刻意识到MediaPlayer 有一个内部状态，因为只有当播放器在特定状态，某些特定的操作才会有效。如果你在错误的状态执行一个操作，系统可能会抛出一个异常会让用户体验相当不好。<br>MediaPlayer 类里有文件显示一个完整的状态转换图，阐明哪些方法可以把MediaPlayer 从一个状态改变到另一个状态。例如,当您创建一个新的MediaPlayer ,它就处于闲置状态。这时用setDataSource()方法来初始化它，把它设置为初始化状态。然后，必须使用prepare()方法或prepareAsync()方法。当MediaPlayer 准备好了，Mediaplayer将进入准备状态,这也就意味着是时候调用start()方法来播放多媒体。另外，在状态转换图上阐明了，可以调用start(),pause()和 seekTo()这些方法在Started,Paused和PlaybackCompleted状态之间进行转换。如果调用stop()方法,这时请注意需要再次准备MediaPlayer ，才可以再一次调用start()方法。<br>在编写代码与MediaPlayer 对象交互时，心里要随时想着状态转换图，因为从错误的状态调用它的方法,是引起错误的常见原因。<br>释放MediaPlayer-Releasing the MediaPlayer<br>MediaPlayer 会消耗宝贵的系统资源。因此 ，应该经常采取额外的预防措施来确保及时把不需要的MediaPlayer取消掉。需要调用release()方法来确保系统分配给它的资源正确释放。例如,正在使用MediaPlayer调用了onStop()方法，这时必须释放MediaPlayer,因为这时活动并非与用户交互，留着它没什么意义（除非你是在后台播放多媒体）。当活动恢复或者重新启动，恢复播放之前,需要创建一个新的MediaPlayer并且重新准备。<br>下面是释放和取消MediaPlayer的方法:<br>mediaPlayer.release(); mediaPlayer = null;<br>作为思考题，考虑一下如果当活动停止的时候你忘了释放MediaPlayer，活动重启后新建一个MediaPlayer，可能会发生的问题。正如你可能知道的，当用户更改屏幕的方向（或以另一种方式更改设备配置），该系统通过重启活动处理（通过默认方式），所以当用户频繁在纵向和横向之间切换时，你可能会很快消耗掉所有的系统资源，原因是你没有释放方向变化时各个方向上创建的新MediaPlayer。(更多关于运行时重启的资料,请查看Handling Runtime Changes)。<br>你可能会想知道在用户离开活动时后台继续播放媒体是如何实现的，采用同样的方式实现的，如内置的音乐应用程序的行为。在这种情况下,你需要通过一个Service来控制MediaPlayer，所以我们开始学习Using a Service with MediaPlayer。</p>
+<p>##5.<br> 使用服务控制MediaPlayer - Using a Service with MediaPlayer<br>如果你希望后台播放媒体，你希望用户操作其他应用时继续播放，你必须开始一个Service并且从那里控制MediaPlayer实例。你必须慎重考虑这个设置，因为用户与系统期望应用程序运行的后台服务应该与系统的其余部分相互作用。如果应用程序不满足这些预期，就不能有良好的用户体验。本节介绍的主要内容是：告诉你相关知识，并提供建议如何接触它们。<br>异步运行 - Running asynchronously<br>首先,如一个Activity,服务里的所有任务默认在单一线程中完成。如果你从同一个应用程序里运行一个Activity和一个Service，它们默认使用相同的线程(“主线程”)。因此，Service需要迅速处理传入的意图并且响应它们的时候从不执行冗长的计算。如果预计调用一些复杂的任务或阻塞，你必须异步处理这些任务：由另一个线程自己实现自己，或使用框架处理异步。<br>例如，当你从主要线程使用一个MediaPlayer ，你应该调用prepareAsync()方法而不是prepare() 方法，实现MediaPlayer.OnPreparedListener，以便当你准备工作完毕后，得到可以开始播放的通知。<br>代码如下：</p>
+<pre><code>public class MyService extends Service implements MediaPlayer.OnPreparedListener { 
+
+    private static final ACTION_PLAY = &quot;com.example.action.PLAY&quot;; 
+
+     MediaPlayer mMediaPlayer = null;
+
+      public int onStartCommand(Intent intent, int flags, int startId) { 
+    ... if (intent.getAction().equals(ACTION_PLAY)){
+             mMediaPlayer = ... // initialize it here
+             mMediaPlayer.setOnPreparedListener(this); 
+             mMediaPlayer.prepareAsync(); // prepare async to not block main thread 
+          }
+    } 
+
+      public void onPrepared(MediaPlayer player){
+
+        player.start();
+
+     } 
+  }
+</code></pre><p>处理异步错误 - Handling asynchronous errors<br>在同步操作中,错误通常会出现异常或错误代码信息。但当你使用异步资源时，您需要确保您的应用程序有错误提示，在MediaPlayer 中，要做到这一点，可以通过实现MediaPlayer.OnErrorListener，并且将它设置在你的MediaPlayer 实体中。</p>
+<pre><code>public class MyService extends Service implements MediaPlayer.OnErrorListener { 
+    MediaPlayer mMediaPlayer; public void initMediaPlayer() {
+     // ...initialize the MediaPlayer here...  
+     mMediaPlayer.setOnErrorListener(this); 
+    } 
+
+    @Override public boolean onError(MediaPlayer mp, int what, int extra) {
+     // ... react appropriately ... // The MediaPlayer has moved to the Error state, must be reset! 
+    }
+ }
+</code></pre><p>请牢记,当出现错误，将这个MediaPlayer 设置为错误状态（请参考MediaPlayer 类文档的完整的状态关系图）您再次使用它之前，必须重置这个状态。<br>使用唤醒锁 - Using wake locks<br>应用程序在后台播放媒体，其服务在运行期间，设备可能会进入休眠状态。因为Android系统希望在设备休眠时节省电池。系统试图关闭手机的应用程序,是没有必要的，包括CPU和WiFi硬件。但是，如果你的服务正在运行或播放着音乐，你希望防止系统干扰你的回放。<br>为了确保您的服务在这些条件下能继续运行，你需要使用“wake locks”。唤醒锁是一种信号系统，它发出信号,显示：应用程序正在使用或可用的功能，或手机闲置。<br>注意:你应该尽量少用唤醒锁，只有在必要时候才使用它们。它们会使设备的电池寿命大大降低。<br>你MediaPlayer 正在播放时，需要确保CPU持续运行，当初始化你的MediaPlayer时，调用setWakeMode()方法。一旦你这样做了,当暂停或停止时候，MediaPlayer 持有指定的锁：</p>
+<pre><code>mMediaPlayer = new MediaPlayer(); // ... other initialization here ... mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+</code></pre><p>在这个例子中获得唤醒锁是指在保证CPU在唤醒状态。当你通过网络获取媒体和您正在使用WiFi时,你可能希望有个WifiLock，可以手动获取并释放。当你开始通过远程URL准备MediaPlayer，你应该创建并获得wi - fi锁。 代码如下：</p>
+<pre><code>WifiLock wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE)) .createWifiLock(WifiManager.WIFI_MODE_FULL, &quot;mylock&quot;); wifiLock.acquire();
+</code></pre><p>当你暂停或停止你的媒体时,或当你不再需要这样的网络,你应该释放该锁: 代码如下：</p>
+<pre><code>wifiLock.release();
+</code></pre><p>作为前景服务运行 - Running as a foreground service<br>服务通常用于执行后台任务，例如获取电子邮件，同步数据，下载内容,或其他。在这些情况下,用户不会意识到这个服务的执行，甚至可能不会注意到这些服务被打断,后来重新启动。毫无疑问，后台播放音乐是一个服务，用户能意识到，任何中断都会严重影响到用户体验。此外，用户可能会希望在这个服务执行期间作用于它。这种情况，服务应该运行一个“前景服务”。前台服务在系统中持有一个更高水平的重要性，系统几乎从未将服务扼杀，因为它对用户有着直接的重要性。当应用在前台运行，该服务还必须提供一个状态栏来通知用户意识有服务正在运行同时允许他们打开一个活动,可以与服务进行交互。<br>为了把你的服务变为前景服务，您必须为状态栏创建一个Notification，并且从Service调用startForeground()方法。<br>代码如下:</p>
+<pre><code>String songName; // assign the song name to songNamePendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT); Notification notification = new Notification();
+ notification.tickerText = text; notification.icon = R.drawable.play0; 
+notification.flags |= Notification.FLAG_ONGOING_EVENT; 
+notification.setLatestEventInfo(getApplicationContext(), &quot;MusicPlayerSample&quot;, &quot;Playing: &quot; + songName, pi); startForeground(NOTIFICATION_ID, notification);
+</code></pre><p>通知区域可见的设备告诉你，服务在前台运行。如果用户选择了这个通知，系统将调用你提供的PendingIntent。在上面的例子中，它打开了一个Activity。（MainActivity）<br>图1显示了如何将通知呈现给用户:<br> Img1.png        Img2.png<br>图1:界面的一个前景服务通知,如上图，显示通知图标(在左)、扩展视图(在右)。<br>实际执行一些用户能够意识到的服务时，你应该保留“foreground service”的状态。相反情况下，你应该调用stopForeground()方法来释放它。 代码如下：</p>
+<pre><code>stopForeground(true);
+</code></pre><p>更多信息，请参考Service和 Status Bar Notifications的相关文档。</p>
+<p>##处理音频焦点 - Handling audio focus=<br>在给定的时间尽管只有一个活动可以运行,但Android是一个多任务环境。这对应用程序使用音频 造成了一个特别大的难度，由于只有一个音频输出,可能会有好几个媒体服务争夺使用它。Android 2.2之前,没有内置机制来解决这个问题，这可能在某些情况下导致糟糕的用户体验。例如，一个用户正在听音乐，同时，另一个应用程序有很重要的事需要通知用户，由于吵闹的音乐用户可能不会听到提示音。从Android 2.2开始,Android平台为应用程序提供了一个方式来协商设备的音频输出。这个机制被称为音频焦点。<br>当您的应用程序需要输出音频如音乐或一个通知,这时你就必须请求音频焦点。一旦得到焦点，它就可以自由的使用声音输出设备，同时它会不断监听焦点的更改。如果它被通知已经失去了音频焦点，它会要么立即杀死音频或立即降低到一个安静的水平（被称为“ducking”——有一个标记,指示哪一个是适当的）当它再次接收焦点时，继续不断播放。<br>音频焦点是自然的合作。应用程序都期望（强烈鼓励）遵守音频焦点指南，但规则并不是系统强制执行的。如果应用程序失去音频焦点后想要播放嘈杂的音乐，在系统中没有什么会阻止他。然而,这样可能会让用户有更糟糕的体验,并可能卸载这运行不当的应用程序。<br>请求音频焦点,您必须从AudioManager调用requestAudioFocus()方法，下面展示一个例子：</p>
+<pre><code>AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE); 
+int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);   
+if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+ // could not get audio focus.}
+</code></pre><p>requestAudioFocus()的第一个参数是AudioManager.OnAudioFocusChangeListener，每当音频焦点有变动的时候其onAudioFocusChange()方法被调用。您还应该在你的服务和活动上实现这个接口。<br>代码如下：</p>
+<pre><code>class MyService extends Service implements AudioManager.OnAudioFocusChangeListener { 
+    // .... public void onAudioFocusChange(int focusChange) {
+     // Do something based on focus change... 
+    }
+ }
+</code></pre><p>focusChange 参数告诉你音频焦点是如何改变的，并且可以使用以下的值之一（他们都是在AudioManager中定义常量的）：<br>AUDIOFOCUS_GAIN: 你已经得到了音频焦点。<br>AUDIOFOCUS_LOSS: 你已经失去了音频焦点很长时间了。你必须停止所有的音频播放。因为你应该不希望长时间等待焦点返回，这将是你尽可能清除你的资源的一个好地方。例如，你应该释放MediaPlayer。<br>AUDIOFOCUS_LOSS_TRANSIENT:你暂时失去了音频焦点，但很快会重新得到焦点。你必须停止所有的音频播放，但是你可以保持你的资源，因为你可能很快会重新获得焦点。<br>AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: 你暂时失去了音频焦点，但你可以小声地继续播放音频（低音量）而不是完全扼杀音频。<br>下面是一个示例实现：</p>
+<pre><code>public void onAudioFocusChange(int focusChange) { 
+
+    switch (focusChange) {
+         case AudioManager.AUDIOFOCUS_GAIN: // resume playback
+        if (mMediaPlayer == null) 
+            initMediaPlayer(); 
+        else if (!mMediaPlayer.isPlaying())
+             mMediaPlayer.start(); 
+        mMediaPlayer.setVolume(1.0f, 1.0f); 
+        break; 
+    case AudioManager.AUDIOFOCUS_LOSS: // Lost focus for an unbounded amount of time: stop playback and release media player 
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop(); 
+            mMediaPlayer.release(); 
+            mMediaPlayer = null; 
+        }
+        break;
+     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT: // Lost focus for a short time, but we have to stop // playback. We don&apos;t release the media player because playback // is likely to resume 
+        if (mMediaPlayer.isPlaying()) 
+            mMediaPlayer.pause(); 
+            break;
+     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: // Lost focus for a short time, but it&apos;s ok to keep playing // at an attenuated level 
+        if (mMediaPlayer.isPlaying()) 
+            mMediaPlayer.setVolume(0.1f, 0.1f);
+        break;
+         }
+     }
+</code></pre><p>记住,音频焦点APIs在API级别8(Android 2.2)及以上才有效。所以如果你想要支持的以前版本的Android，(如果有的话)你应该采取一种向后兼容性策略,允许您使用该特性，（如果没有的话），只能选择8以后的版本。<br>通过反射调用音频焦点方法或通过在一个单独类中实现所有的音频焦点特性，您可以实现向后兼容性（AudioFocusHelper 中阐明）。下面是这样一个类的示例:</p>
+<pre><code>public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener {
+     AudioManager mAudioManager; // other fields here, you&apos;ll probably hold a reference to an interface // that you can use to communicate the focus changes to your Service   
+
+     public AudioFocusHelper(Context ctx, ) {
+         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE); 
+        // ... 
+     }
+
+     public boolean requestFocus() {
+         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == mAudioManager.requestAudioFocus(mContext, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+     }   
+
+     public boolean abandonFocus() { 
+         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == mAudioManager.abandonAudioFocus(this); 
+     }
+
+     @Override public void onAudioFocusChange(int focusChange) { 
+        // let your service know about the focus change 
+     }
+ }
+</code></pre><p>当你发现系统运行时API级别在8级或以上时，您可以创建AudioFocusHelper 类的一个实例，例如：</p>
+<pre><code>if (android.os.Build.VERSION.SDK_INT &gt;= 8) { 
+    mAudioFocusHelper = new AudioFocusHelper(getApplicationContext(), this);
+ } else {
+    mAudioFocusHelper = null; 
+ }
+</code></pre><p>执行清理 - Performing cleanup<br>正如前面所提到的,MediaPlayer 对象会消耗大量的系统资源，所以你可以在你需要用他的时候保留他，当你不需要他的时候调用release() 方法。调用这个显式地清除方法是重要的，而不是依赖于系统的垃圾收集，因为它可能需要一些时间垃圾收集器才能收回MediaPlayer ，因为这只是内存敏感的需求而不是其他媒体资源的短缺。既然如此，当你使用一个服务时，你应该覆盖onDestroy()方法，来确定你的MediaPlayer释放了。<br>代码如下：</p>
+<pre><code>  public class MyService extends Service {
+
+    MediaPlayer mMediaPlayer; // ...   
+
+    @Override public void onDestroy() {
+         if (mMediaPlayer != null) 
+         mMediaPlayer.release(); 
+    }
+}
+</code></pre><p>你最好始终寻找其它机会来释放你的MediaPlayer，关闭的时候就释放掉。例如，如果你期望较长的一段时间不能够播放媒体（例如，失去音频焦点后），你肯定得先释放你现有的MediaPlayer ，以后要用的时候再创建它。另一方面,如果你只希望停止播放很短的一段时间,你应该尽量保留你的MediaPlayer，以免花费时间重新创建和准备一遍。<br>处理AUDIO_BECOMING_NOISY意图 - Handling the AUDIO_BECOMING_NOISY Intent<br>许多编写良好的应用程序有以下特点，当一个事件导致音频变得聒噪时，自动停止音频播放。(通过外部扬声器输出)。例如,一个用户戴着耳机听音乐，可能会不小心切断耳机和设备的链接。虽然,这种行为不会自动发生。如果您没有实现这个特性，设备的外部扬声器会将音频播放出来，这可能是用户不希望发生的。<br>这些情况下通过处理ACTION_AUDIO_BECOMING_NOISY意图，可以让你的应用程序停止播放音乐，通过在你的manifest里添加以下代码，你可以注册一个接收器：<br>“.MusicIntentReceiver”&gt; “android.media.AUDIO_BECOMING_NOISY” /&gt;<br>注册MusicIntentReceiver 类当作一个广播接收器的意图，然后您应该实现这类，代码如下:</p>
+<pre><code>public class MusicIntentReceiver implements android.content.BroadcastReceiver {
+
+     @Override public void onReceive(Context ctx, Intent intent) { 
+        if (intent.getAction().equals( android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
+             // signal your service to stop playback // (via an Intent, for instance) 
+        }
+     }
+ }
+</code></pre><p>从内容解析器检索媒体 - Retrieving Media from a Content Resolver<br>在媒体播放器应用程序中，另一个可能有用的特性是用户可以在设备上检索音乐。你可以通过为外部媒体查询ContentResolver，代码如下：</p>
+<pre><code>ContentResolver contentResolver = getContentResolver(); 
+Uri uri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI; 
+Cursor cursor = contentResolver.query(uri, null, null, null, null); 
+if (cursor == null) { 
+    // query failed, handle error.
+} else if (!cursor.moveToFirst()) { 
+    // no media on the device 
+} else { 
+    int titleColumn = cursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE);
+       int idColumn = cursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID); 
+do { 
+    long thisId = cursor.getLong(idColumn); 
+    String thisTitle = cursor.getString(titleColumn); // ...process entry... 
+    } while (cursor.moveToNext()); 
+}
+</code></pre><p>要和MediaPlayer一起使用,你可以这样做,代码如下:</p>
+<pre><code>long id = ;
+Uri contentUri = ContentUris.withAppendedId( android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id); 
+mMediaPlayer = new MediaPlayer(); 
+mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC); 
+mMediaPlayer.setDataSource(getApplicationContext(), contentUri);
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://silenceyixia.github.io/2017/10/31/about-media/" data-id="cj9ffmnju0001vonf03gwht2r" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-MediaPlayer" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/31/MediaPlayer/" class="article-date">
+  <time datetime="2017-10-31T08:24:14.552Z" itemprop="datePublished">2017-10-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<h2 id="android-MediaPlayer使用注意"><a href="#android-MediaPlayer使用注意" class="headerlink" title="android MediaPlayer使用注意"></a>android MediaPlayer使用注意</h2><h5 id="2017-10-31-16-24-14"><a href="#2017-10-31-16-24-14" class="headerlink" title="2017-10-31 16:24:14"></a>2017-10-31 16:24:14</h5><p>###标签： android mediaplayer 视频 音频</p>
+<h6 id="Android的多媒体框架包括支持播放多种常见的媒体类型，使您可以轻松地把音频、视频和图像集成到你的应用。你可以播放音频或视频媒体文件，这些文件是存储在你的应用程序的资源文件中的。应用程序的资源文件可以是文件系统中独立的文件，或通过网络连接获取的一个数据流，所有使用MediaPlayer-APIS的资源文件。"><a href="#Android的多媒体框架包括支持播放多种常见的媒体类型，使您可以轻松地把音频、视频和图像集成到你的应用。你可以播放音频或视频媒体文件，这些文件是存储在你的应用程序的资源文件中的。应用程序的资源文件可以是文件系统中独立的文件，或通过网络连接获取的一个数据流，所有使用MediaPlayer-APIS的资源文件。" class="headerlink" title="Android的多媒体框架包括支持播放多种常见的媒体类型，使您可以轻松地把音频、视频和图像集成到你的应用。你可以播放音频或视频媒体文件，这些文件是存储在你的应用程序的资源文件中的。应用程序的资源文件可以是文件系统中独立的文件，或通过网络连接获取的一个数据流，所有使用MediaPlayer APIS的资源文件。"></a>Android的多媒体框架包括支持播放多种常见的媒体类型，使您可以轻松地把音频、视频和图像集成到你的应用。你可以播放音频或视频媒体文件，这些文件是存储在你的应用程序的资源文件中的。应用程序的资源文件可以是文件系统中独立的文件，或通过网络连接获取的一个数据流，所有使用MediaPlayer APIS的资源文件。</h6><p>##1.<br>注意：如果你通过一个URL来获取一个在线媒体文件，该文件必须能够支持渐进式下载。</p>
+<p>##2.<br>警告：当你使用setDataSource()方法时，必须捕捉非法数据异常和输入输出异常，因为正在被你引用的文件可能不存在在。</p>
+<p>##3.<br>异步准备 - Asynchronous Preparation<br>使用MediaPlayer 的原则很简单。然而，重要的是要记住，有必要将更多的一些东西正确地集成到一个典型的Android应用程序。比如，调用prepare()方法可能需要较长的时间来执行，因为它可能涉及获取和解码媒体数据。因此，例如这样的任何方法，可能需要很长时间执行，要尽量避免在主线程（UI线程）调用它。因为那样很可能会造成ANR，这样用户体验是很不好的。 所以即使你预期资源能快速加载，但是记住任何超过十分之一秒的反应在界面上会造成明显的停顿，将导致给用户的印象是：你的应用程序是缓慢的。<br>为了避免你的UI线程挂起，产生另一个线程准备MediaPlayer 当完成时通知主线程。你可以写自己的线程的逻辑，框架提供prepareAsync() 方法，方便的使用MediaPlayer 。该方法在后台开始准备媒体并立即返回。当媒体准备好了，MediaPlayer.ONPREPAREDLISTENER的ONPREPARED 方法，通过配置setonpreparedlistener()方法来调用。</p>
+<p>##4.<br>状态管理 - Managing State<br>关于MediaPlayer ，你需要记住的另一点是它的状态。即，在你编写自己的代码的时候，必须时刻意识到MediaPlayer 有一个内部状态，因为只有当播放器在特定状态，某些特定的操作才会有效。如果你在错误的状态执行一个操作，系统可能会抛出一个异常会让用户体验相当不好。<br>MediaPlayer 类里有文件显示一个完整的状态转换图，阐明哪些方法可以把MediaPlayer 从一个状态改变到另一个状态。例如,当您创建一个新的MediaPlayer ,它就处于闲置状态。这时用setDataSource()方法来初始化它，把它设置为初始化状态。然后，必须使用prepare()方法或prepareAsync()方法。当MediaPlayer 准备好了，Mediaplayer将进入准备状态,这也就意味着是时候调用start()方法来播放多媒体。另外，在状态转换图上阐明了，可以调用start(),pause()和 seekTo()这些方法在Started,Paused和PlaybackCompleted状态之间进行转换。如果调用stop()方法,这时请注意需要再次准备MediaPlayer ，才可以再一次调用start()方法。<br>在编写代码与MediaPlayer 对象交互时，心里要随时想着状态转换图，因为从错误的状态调用它的方法,是引起错误的常见原因。<br>释放MediaPlayer-Releasing the MediaPlayer<br>MediaPlayer 会消耗宝贵的系统资源。因此 ，应该经常采取额外的预防措施来确保及时把不需要的MediaPlayer取消掉。需要调用release()方法来确保系统分配给它的资源正确释放。例如,正在使用MediaPlayer调用了onStop()方法，这时必须释放MediaPlayer,因为这时活动并非与用户交互，留着它没什么意义（除非你是在后台播放多媒体）。当活动恢复或者重新启动，恢复播放之前,需要创建一个新的MediaPlayer并且重新准备。<br>下面是释放和取消MediaPlayer的方法:<br>mediaPlayer.release(); mediaPlayer = null;<br>作为思考题，考虑一下如果当活动停止的时候你忘了释放MediaPlayer，活动重启后新建一个MediaPlayer，可能会发生的问题。正如你可能知道的，当用户更改屏幕的方向（或以另一种方式更改设备配置），该系统通过重启活动处理（通过默认方式），所以当用户频繁在纵向和横向之间切换时，你可能会很快消耗掉所有的系统资源，原因是你没有释放方向变化时各个方向上创建的新MediaPlayer。(更多关于运行时重启的资料,请查看Handling Runtime Changes)。<br>你可能会想知道在用户离开活动时后台继续播放媒体是如何实现的，采用同样的方式实现的，如内置的音乐应用程序的行为。在这种情况下,你需要通过一个Service来控制MediaPlayer，所以我们开始学习Using a Service with MediaPlayer。</p>
+<p>##5.<br> 使用服务控制MediaPlayer - Using a Service with MediaPlayer<br>如果你希望后台播放媒体，你希望用户操作其他应用时继续播放，你必须开始一个Service并且从那里控制MediaPlayer实例。你必须慎重考虑这个设置，因为用户与系统期望应用程序运行的后台服务应该与系统的其余部分相互作用。如果应用程序不满足这些预期，就不能有良好的用户体验。本节介绍的主要内容是：告诉你相关知识，并提供建议如何接触它们。<br>异步运行 - Running asynchronously<br>首先,如一个Activity,服务里的所有任务默认在单一线程中完成。如果你从同一个应用程序里运行一个Activity和一个Service，它们默认使用相同的线程(“主线程”)。因此，Service需要迅速处理传入的意图并且响应它们的时候从不执行冗长的计算。如果预计调用一些复杂的任务或阻塞，你必须异步处理这些任务：由另一个线程自己实现自己，或使用框架处理异步。<br>例如，当你从主要线程使用一个MediaPlayer ，你应该调用prepareAsync()方法而不是prepare() 方法，实现MediaPlayer.OnPreparedListener，以便当你准备工作完毕后，得到可以开始播放的通知。<br>代码如下：</p>
+<pre><code>public class MyService extends Service implements MediaPlayer.OnPreparedListener { 
+
+    private static final ACTION_PLAY = &quot;com.example.action.PLAY&quot;; 
+
+     MediaPlayer mMediaPlayer = null;
+
+      public int onStartCommand(Intent intent, int flags, int startId) { 
+    ... if (intent.getAction().equals(ACTION_PLAY)){
+             mMediaPlayer = ... // initialize it here
+             mMediaPlayer.setOnPreparedListener(this); 
+             mMediaPlayer.prepareAsync(); // prepare async to not block main thread 
+          }
+    } 
+
+      public void onPrepared(MediaPlayer player){
+
+        player.start();
+
+     } 
+  }
+</code></pre><p>处理异步错误 - Handling asynchronous errors<br>在同步操作中,错误通常会出现异常或错误代码信息。但当你使用异步资源时，您需要确保您的应用程序有错误提示，在MediaPlayer 中，要做到这一点，可以通过实现MediaPlayer.OnErrorListener，并且将它设置在你的MediaPlayer 实体中。</p>
+<pre><code>public class MyService extends Service implements MediaPlayer.OnErrorListener { 
+    MediaPlayer mMediaPlayer; public void initMediaPlayer() {
+     // ...initialize the MediaPlayer here...  
+     mMediaPlayer.setOnErrorListener(this); 
+    } 
+
+    @Override public boolean onError(MediaPlayer mp, int what, int extra) {
+     // ... react appropriately ... // The MediaPlayer has moved to the Error state, must be reset! 
+    }
+ }
+</code></pre><p>请牢记,当出现错误，将这个MediaPlayer 设置为错误状态（请参考MediaPlayer 类文档的完整的状态关系图）您再次使用它之前，必须重置这个状态。<br>使用唤醒锁 - Using wake locks<br>应用程序在后台播放媒体，其服务在运行期间，设备可能会进入休眠状态。因为Android系统希望在设备休眠时节省电池。系统试图关闭手机的应用程序,是没有必要的，包括CPU和WiFi硬件。但是，如果你的服务正在运行或播放着音乐，你希望防止系统干扰你的回放。<br>为了确保您的服务在这些条件下能继续运行，你需要使用“wake locks”。唤醒锁是一种信号系统，它发出信号,显示：应用程序正在使用或可用的功能，或手机闲置。<br>注意:你应该尽量少用唤醒锁，只有在必要时候才使用它们。它们会使设备的电池寿命大大降低。<br>你MediaPlayer 正在播放时，需要确保CPU持续运行，当初始化你的MediaPlayer时，调用setWakeMode()方法。一旦你这样做了,当暂停或停止时候，MediaPlayer 持有指定的锁：</p>
+<pre><code>mMediaPlayer = new MediaPlayer(); // ... other initialization here ... mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+</code></pre><p>在这个例子中获得唤醒锁是指在保证CPU在唤醒状态。当你通过网络获取媒体和您正在使用WiFi时,你可能希望有个WifiLock，可以手动获取并释放。当你开始通过远程URL准备MediaPlayer，你应该创建并获得wi - fi锁。 代码如下：</p>
+<pre><code>WifiLock wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE)) .createWifiLock(WifiManager.WIFI_MODE_FULL, &quot;mylock&quot;); wifiLock.acquire();
+</code></pre><p>当你暂停或停止你的媒体时,或当你不再需要这样的网络,你应该释放该锁: 代码如下：</p>
+<pre><code>wifiLock.release();
+</code></pre><p>作为前景服务运行 - Running as a foreground service<br>服务通常用于执行后台任务，例如获取电子邮件，同步数据，下载内容,或其他。在这些情况下,用户不会意识到这个服务的执行，甚至可能不会注意到这些服务被打断,后来重新启动。毫无疑问，后台播放音乐是一个服务，用户能意识到，任何中断都会严重影响到用户体验。此外，用户可能会希望在这个服务执行期间作用于它。这种情况，服务应该运行一个“前景服务”。前台服务在系统中持有一个更高水平的重要性，系统几乎从未将服务扼杀，因为它对用户有着直接的重要性。当应用在前台运行，该服务还必须提供一个状态栏来通知用户意识有服务正在运行同时允许他们打开一个活动,可以与服务进行交互。<br>为了把你的服务变为前景服务，您必须为状态栏创建一个Notification，并且从Service调用startForeground()方法。<br>代码如下:</p>
+<pre><code>String songName; // assign the song name to songNamePendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT); Notification notification = new Notification();
+ notification.tickerText = text; notification.icon = R.drawable.play0; 
+notification.flags |= Notification.FLAG_ONGOING_EVENT; 
+notification.setLatestEventInfo(getApplicationContext(), &quot;MusicPlayerSample&quot;, &quot;Playing: &quot; + songName, pi); startForeground(NOTIFICATION_ID, notification);
+</code></pre><p>通知区域可见的设备告诉你，服务在前台运行。如果用户选择了这个通知，系统将调用你提供的PendingIntent。在上面的例子中，它打开了一个Activity。（MainActivity）<br>图1显示了如何将通知呈现给用户:<br> Img1.png        Img2.png<br>图1:界面的一个前景服务通知,如上图，显示通知图标(在左)、扩展视图(在右)。<br>实际执行一些用户能够意识到的服务时，你应该保留“foreground service”的状态。相反情况下，你应该调用stopForeground()方法来释放它。 代码如下：</p>
+<pre><code>stopForeground(true);
+</code></pre><p>更多信息，请参考Service和 Status Bar Notifications的相关文档。</p>
+<p>##处理音频焦点 - Handling audio focus=<br>在给定的时间尽管只有一个活动可以运行,但Android是一个多任务环境。这对应用程序使用音频 造成了一个特别大的难度，由于只有一个音频输出,可能会有好几个媒体服务争夺使用它。Android 2.2之前,没有内置机制来解决这个问题，这可能在某些情况下导致糟糕的用户体验。例如，一个用户正在听音乐，同时，另一个应用程序有很重要的事需要通知用户，由于吵闹的音乐用户可能不会听到提示音。从Android 2.2开始,Android平台为应用程序提供了一个方式来协商设备的音频输出。这个机制被称为音频焦点。<br>当您的应用程序需要输出音频如音乐或一个通知,这时你就必须请求音频焦点。一旦得到焦点，它就可以自由的使用声音输出设备，同时它会不断监听焦点的更改。如果它被通知已经失去了音频焦点，它会要么立即杀死音频或立即降低到一个安静的水平（被称为“ducking”——有一个标记,指示哪一个是适当的）当它再次接收焦点时，继续不断播放。<br>音频焦点是自然的合作。应用程序都期望（强烈鼓励）遵守音频焦点指南，但规则并不是系统强制执行的。如果应用程序失去音频焦点后想要播放嘈杂的音乐，在系统中没有什么会阻止他。然而,这样可能会让用户有更糟糕的体验,并可能卸载这运行不当的应用程序。<br>请求音频焦点,您必须从AudioManager调用requestAudioFocus()方法，下面展示一个例子：</p>
+<pre><code>AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE); 
+int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);   
+if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+ // could not get audio focus.}
+</code></pre><p>requestAudioFocus()的第一个参数是AudioManager.OnAudioFocusChangeListener，每当音频焦点有变动的时候其onAudioFocusChange()方法被调用。您还应该在你的服务和活动上实现这个接口。<br>代码如下：</p>
+<pre><code>class MyService extends Service implements AudioManager.OnAudioFocusChangeListener { 
+    // .... public void onAudioFocusChange(int focusChange) {
+     // Do something based on focus change... 
+    }
+ }
+</code></pre><p>focusChange 参数告诉你音频焦点是如何改变的，并且可以使用以下的值之一（他们都是在AudioManager中定义常量的）：<br>AUDIOFOCUS_GAIN: 你已经得到了音频焦点。<br>AUDIOFOCUS_LOSS: 你已经失去了音频焦点很长时间了。你必须停止所有的音频播放。因为你应该不希望长时间等待焦点返回，这将是你尽可能清除你的资源的一个好地方。例如，你应该释放MediaPlayer。<br>AUDIOFOCUS_LOSS_TRANSIENT:你暂时失去了音频焦点，但很快会重新得到焦点。你必须停止所有的音频播放，但是你可以保持你的资源，因为你可能很快会重新获得焦点。<br>AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: 你暂时失去了音频焦点，但你可以小声地继续播放音频（低音量）而不是完全扼杀音频。<br>下面是一个示例实现：</p>
+<pre><code>public void onAudioFocusChange(int focusChange) { 
+
+    switch (focusChange) {
+         case AudioManager.AUDIOFOCUS_GAIN: // resume playback
+        if (mMediaPlayer == null) 
+            initMediaPlayer(); 
+        else if (!mMediaPlayer.isPlaying())
+             mMediaPlayer.start(); 
+        mMediaPlayer.setVolume(1.0f, 1.0f); 
+        break; 
+    case AudioManager.AUDIOFOCUS_LOSS: // Lost focus for an unbounded amount of time: stop playback and release media player 
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop(); 
+            mMediaPlayer.release(); 
+            mMediaPlayer = null; 
+        }
+        break;
+     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT: // Lost focus for a short time, but we have to stop // playback. We don&apos;t release the media player because playback // is likely to resume 
+        if (mMediaPlayer.isPlaying()) 
+            mMediaPlayer.pause(); 
+            break;
+     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: // Lost focus for a short time, but it&apos;s ok to keep playing // at an attenuated level 
+        if (mMediaPlayer.isPlaying()) 
+            mMediaPlayer.setVolume(0.1f, 0.1f);
+        break;
+         }
+     }
+</code></pre><p>记住,音频焦点APIs在API级别8(Android 2.2)及以上才有效。所以如果你想要支持的以前版本的Android，(如果有的话)你应该采取一种向后兼容性策略,允许您使用该特性，（如果没有的话），只能选择8以后的版本。<br>通过反射调用音频焦点方法或通过在一个单独类中实现所有的音频焦点特性，您可以实现向后兼容性（AudioFocusHelper 中阐明）。下面是这样一个类的示例:</p>
+<pre><code>public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener {
+     AudioManager mAudioManager; // other fields here, you&apos;ll probably hold a reference to an interface // that you can use to communicate the focus changes to your Service   
+
+     public AudioFocusHelper(Context ctx, ) {
+         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE); 
+        // ... 
+     }
+
+     public boolean requestFocus() {
+         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == mAudioManager.requestAudioFocus(mContext, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+     }   
+
+     public boolean abandonFocus() { 
+         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == mAudioManager.abandonAudioFocus(this); 
+     }
+
+     @Override public void onAudioFocusChange(int focusChange) { 
+        // let your service know about the focus change 
+     }
+ }
+</code></pre><p>当你发现系统运行时API级别在8级或以上时，您可以创建AudioFocusHelper 类的一个实例，例如：</p>
+<pre><code>if (android.os.Build.VERSION.SDK_INT &gt;= 8) { 
+    mAudioFocusHelper = new AudioFocusHelper(getApplicationContext(), this);
+ } else {
+    mAudioFocusHelper = null; 
+ }
+</code></pre><p>执行清理 - Performing cleanup<br>正如前面所提到的,MediaPlayer 对象会消耗大量的系统资源，所以你可以在你需要用他的时候保留他，当你不需要他的时候调用release() 方法。调用这个显式地清除方法是重要的，而不是依赖于系统的垃圾收集，因为它可能需要一些时间垃圾收集器才能收回MediaPlayer ，因为这只是内存敏感的需求而不是其他媒体资源的短缺。既然如此，当你使用一个服务时，你应该覆盖onDestroy()方法，来确定你的MediaPlayer释放了。<br>代码如下：</p>
+<pre><code>  public class MyService extends Service {
+
+    MediaPlayer mMediaPlayer; // ...   
+
+    @Override public void onDestroy() {
+         if (mMediaPlayer != null) 
+         mMediaPlayer.release(); 
+    }
+}
+</code></pre><p>你最好始终寻找其它机会来释放你的MediaPlayer，关闭的时候就释放掉。例如，如果你期望较长的一段时间不能够播放媒体（例如，失去音频焦点后），你肯定得先释放你现有的MediaPlayer ，以后要用的时候再创建它。另一方面,如果你只希望停止播放很短的一段时间,你应该尽量保留你的MediaPlayer，以免花费时间重新创建和准备一遍。<br>处理AUDIO_BECOMING_NOISY意图 - Handling the AUDIO_BECOMING_NOISY Intent<br>许多编写良好的应用程序有以下特点，当一个事件导致音频变得聒噪时，自动停止音频播放。(通过外部扬声器输出)。例如,一个用户戴着耳机听音乐，可能会不小心切断耳机和设备的链接。虽然,这种行为不会自动发生。如果您没有实现这个特性，设备的外部扬声器会将音频播放出来，这可能是用户不希望发生的。<br>这些情况下通过处理ACTION_AUDIO_BECOMING_NOISY意图，可以让你的应用程序停止播放音乐，通过在你的manifest里添加以下代码，你可以注册一个接收器：<br>“.MusicIntentReceiver”&gt; “android.media.AUDIO_BECOMING_NOISY” /&gt;<br>注册MusicIntentReceiver 类当作一个广播接收器的意图，然后您应该实现这类，代码如下:</p>
+<pre><code>public class MusicIntentReceiver implements android.content.BroadcastReceiver {
+
+     @Override public void onReceive(Context ctx, Intent intent) { 
+        if (intent.getAction().equals( android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
+             // signal your service to stop playback // (via an Intent, for instance) 
+        }
+     }
+ }
+</code></pre><p>从内容解析器检索媒体 - Retrieving Media from a Content Resolver<br>在媒体播放器应用程序中，另一个可能有用的特性是用户可以在设备上检索音乐。你可以通过为外部媒体查询ContentResolver，代码如下：</p>
+<pre><code>ContentResolver contentResolver = getContentResolver(); 
+Uri uri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI; 
+Cursor cursor = contentResolver.query(uri, null, null, null, null); 
+if (cursor == null) { 
+    // query failed, handle error.
+} else if (!cursor.moveToFirst()) { 
+    // no media on the device 
+} else { 
+    int titleColumn = cursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE);
+       int idColumn = cursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID); 
+do { 
+    long thisId = cursor.getLong(idColumn); 
+    String thisTitle = cursor.getString(titleColumn); // ...process entry... 
+    } while (cursor.moveToNext()); 
+}
+</code></pre><p>要和MediaPlayer一起使用,你可以这样做,代码如下:</p>
+<pre><code>long id = ;
+Uri contentUri = ContentUris.withAppendedId( android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id); 
+mMediaPlayer = new MediaPlayer(); 
+mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC); 
+mMediaPlayer.setDataSource(getApplicationContext(), contentUri);
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://silenceyixia.github.io/2017/10/31/MediaPlayer/" data-id="cj9ffmnjo0000vonfwukzn4v2" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/10/31/hello-world/" class="article-date">
+  <time datetime="2017-10-31T06:01:46.075Z" itemprop="datePublished">2017-10-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/31/hello-world/">Hello World</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://silenceyixia.github.io/2017/10/31/hello-world/" data-id="cj9ffmnk30002vonfqswjiokg" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/10/31/about-media/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/31/MediaPlayer/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/31/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 silenceyixia<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
