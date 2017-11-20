@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>commitallowingstateloss 和commit的区别 | Silenceyixia_博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1、什么是FragmentTransaction？使用Fragment时，可以通过用户交互来执行一些动作，比如增加、移除、替换等。 所有这些改变构成一个集合，这个集合被叫做一个transaction。 可以调用FragmentTransaction中的方法来处理这个transaction，并且可以将transaction存进由activity管理的back stack中，这样用户就可以进行frag">
+<meta name="keywords" content="标签:源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="commitallowingstateloss 和commit的区别">
+<meta property="og:url" content="http://silenceyixia.github.io/2017/11/20/commitallowingstateloss-和commit的区别/index.html">
+<meta property="og:site_name" content="Silenceyixia_博客">
+<meta property="og:description" content="1、什么是FragmentTransaction？使用Fragment时，可以通过用户交互来执行一些动作，比如增加、移除、替换等。 所有这些改变构成一个集合，这个集合被叫做一个transaction。 可以调用FragmentTransaction中的方法来处理这个transaction，并且可以将transaction存进由activity管理的back stack中，这样用户就可以进行frag">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-11-20T09:53:30.302Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="commitallowingstateloss 和commit的区别">
+<meta name="twitter:description" content="1、什么是FragmentTransaction？使用Fragment时，可以通过用户交互来执行一些动作，比如增加、移除、替换等。 所有这些改变构成一个集合，这个集合被叫做一个transaction。 可以调用FragmentTransaction中的方法来处理这个transaction，并且可以将transaction存进由activity管理的back stack中，这样用户就可以进行frag">
+  
+    <link rel="alternate" href="/atom.xml" title="Silenceyixia_博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Silenceyixia_博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">android学习成长之路</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://silenceyixia.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-commitallowingstateloss-和commit的区别" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/11/20/commitallowingstateloss-和commit的区别/" class="article-date">
+  <time datetime="2017-11-20T09:23:55.000Z" itemprop="datePublished">2017-11-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      commitallowingstateloss 和commit的区别
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1、什么是FragmentTransaction？"><a href="#1、什么是FragmentTransaction？" class="headerlink" title="1、什么是FragmentTransaction？"></a>1、什么是FragmentTransaction？</h3><p>使用Fragment时，可以通过用户交互来执行一些动作，比如增加、移除、替换等。</p>
+<p>所有这些改变构成一个集合，这个集合被叫做一个transaction。</p>
+<p>可以调用FragmentTransaction中的方法来处理这个transaction，并且可以将transaction存进由activity管理的back stack中，这样用户就可以进行fragment变化的回退操作。</p>
+<p>可以这样得到FragmentTransaction类的实例：</p>
+<pre><code>FragmentManager  mFragmentManager = getSupportFragmentManager();
+
+FragmentTransaction  mFragmentTransaction = mFragmentManager.beginTransaction();
+</code></pre><h3 id="2、commit和executePendingTransactions的区别"><a href="#2、commit和executePendingTransactions的区别" class="headerlink" title="2、commit和executePendingTransactions的区别"></a>2、commit和executePendingTransactions的区别</h3><p>用add(), remove(), replace()方法，把所有需要的变化加进去，然后调用commit()方法，将这些变化应用。<br>在commit()方法之前，你可以调用addToBackStack()，把这个transaction加入back stack中去，这个back stack是由activity管理的，当用户按返回键时，就会回到上一个fragment的状态。<br>你只能在activity存储它的状态（当用户要离开activity时）之前调用commit()，如果在存储状态之后调用commit()，将会抛出一个异常。<br>这是因为当activity再次被恢复时commit之后的状态将丢失。如果丢失也没关系，那么使用commitAllowingStateLoss()方法。<br>3、问什么在存储状态之后调用commit会报异常？<br>我们查看Android源码发现FragmentManager和FragmentTransaction是一个虚类<br>那他们在activity中的实例化代码是如何处理的呢？<br>首先是getSupportFragmentManager的方法</p>
+<pre><code>/**
+  * Return the FragmentManager for interacting with fragments associated with this activity.
+ */
+
+public FragmentManager getSupportFragmentManager() {
+
+return mFragments;
+
+}
+</code></pre><p>查找到mFragments。final FragmentManagerImpl mFragments = new FragmentManagerImpl();<br>我们发现FragmentManagerImpl是继承于FragmentManager的一个实体类<br>view sourceprint?</p>
+<pre><code>/**
+ * Container for fragments associated with an activity.
+ */
+
+final class FragmentManagerImpl extends FragmentManager {
+
+
+........
+
+
+@Override
+public FragmentTransaction beginTransaction() {
+    return new BackStackRecord(this);
+}
+
+
+........
+
+
+}
+</code></pre><p>为了简便我们删除了一些不要的代码只留下关键的方法。<br>通过这段代码，我们可以查看到beginTransaction方法实际返回的是一个继承于FragmentTransaction的BackStackRecord类<br>我们来查看BackStackRecord的代码，查看他的用法</p>
+<pre><code>/**
+ * @hide Entry of an operation on the fragment back stack.
+ */
+
+final class BackStackRecord extends FragmentTransaction implements
+
+FragmentManager.BackStackEntry, Runnable {
+
+    ..........
+
+    public int commit() {
+
+        return commitInternal(false);
+
+    }
+
+
+    public int commitAllowingStateLoss() {
+
+        return commitInternal(true);
+
+    }
+
+
+    int commitInternal(boolean allowStateLoss) {
+
+        if (mCommitted) throw new IllegalStateException(&quot;commit already called&quot;);
+
+        if (FragmentManagerImpl.DEBUG) Log.v(TAG, &quot;Commit: &quot; + this);
+
+        mCommitted = true;
+
+        if (mAddToBackStack) {
+
+            mIndex = mManager.allocBackStackIndex(this);
+
+        } else {
+
+        mIndex = -1;
+
+        }
+
+        mManager.enqueueAction(this, allowStateLoss);
+
+        return mIndex;
+
+    }
+
+    ..........
+
+}
+</code></pre><p>绕了大半天，终于找到commit方法和commitAllowingStateLoss方法，他们都同时调用了commitInternal方法，只是传的参数略有不同，一个是true，一个是false。我们发现在执行这个方法之前会首先对mCommitted进行判断，根据代码语义我们可以知道mCommitted就是是否已经commit的意思<br>最后，commitInternal调用了mManager.enqueueAction的方法。让我们回到FragmentManager，看这个方法是如何操作的。我们找到这个方法。</p>
+<pre><code>public void enqueueAction(Runnable action, boolean allowStateLoss) {
+    if (!allowStateLoss) {
+        checkStateLoss();
+    }
+    synchronized (this) {
+        if (mDestroyed || mHost == null) {
+            throw new IllegalStateException(&quot;Activity has been destroyed&quot;);
+        }
+        if (mPendingActions == null) {
+            mPendingActions = new ArrayList&lt;Runnable&gt;();
+        }
+        mPendingActions.add(action);
+        if (mPendingActions.size() == 1) {
+            mHost.getHandler().removeCallbacks(mExecCommit);
+            mHost.getHandler().post(mExecCommit);
+        }
+    }
+}
+</code></pre><p>经分析后，我们可以发现，此方法在对 commit和commitAllowingStateLoss的传参进行判断后，将任务扔进activity的线程队列中。那这个两个方法区别就在传参判断后的处理方法checkStateLoss，那接下来，让我们查看一下checkStateLoss方法，看对参数进行判断后，做了什么样的处理。</p>
+<pre><code>private void checkStateLoss() {
+
+    if (mStateSaved) {
+        throw new IllegalStateException(&quot;Can not perform this action after onSaveInstanceState&quot;);
+    }    
+
+    if (mNoTransactionsBecause != null) {
+        throw new IllegalStateException(&quot;Can not perform this action inside of &quot; + mNoTransactionsBecause);
+    }
+
+}
+</code></pre><p>ok，到这里，真相总算大明，当使用commit方法时，系统将进行状态判断，如果状态（mStateSaved）已经保存，将发生”Can not perform this action after onSaveInstanceState”错误。<br>如果mNoTransactionsBecause已经存在，将发生”Can not perform this action inside of “ + mNoTransactionsBecause错误</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://silenceyixia.github.io/2017/11/20/commitallowingstateloss-和commit的区别/" data-id="cja80cqhv000094nfwreykii6" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/10/31/about-media/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">android MediaPlayer使用注意</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/android-mediaplayer-视频-音频/">android mediaplayer 视频 音频</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/标签-源码分析/" style="font-size: 10px;">标签:源码分析</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/11/20/commitallowingstateloss-和commit的区别/">commitallowingstateloss 和commit的区别</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/31/about-media/">android MediaPlayer使用注意</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 silenceyixia<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
