@@ -66,6 +66,51 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-设计模式总结" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/12/21/设计模式总结/" class="article-date">
+  <time datetime="2017-12-21T08:24:14.000Z" itemprop="datePublished">2017-12-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/12/21/设计模式总结/">设计模式总结</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h6 id="前面学习了一部分创建型模式，发现了一个比设计模式更重要的东西：设计模式原则。对于设计模式来说，为什么这个模式要这样解决这个问题，而另一个模式要那样，它们背后都遵循的就是永恒的设计原则。可以说，设计原则是设计模式的灵魂。"><a href="#前面学习了一部分创建型模式，发现了一个比设计模式更重要的东西：设计模式原则。对于设计模式来说，为什么这个模式要这样解决这个问题，而另一个模式要那样，它们背后都遵循的就是永恒的设计原则。可以说，设计原则是设计模式的灵魂。" class="headerlink" title="前面学习了一部分创建型模式，发现了一个比设计模式更重要的东西：设计模式原则。对于设计模式来说，为什么这个模式要这样解决这个问题，而另一个模式要那样，它们背后都遵循的就是永恒的设计原则。可以说，设计原则是设计模式的灵魂。"></a>前面学习了一部分创建型模式，发现了一个比设计模式更重要的东西：设计模式原则。对于设计模式来说，为什么这个模式要这样解决这个问题，而另一个模式要那样，它们背后都遵循的就是永恒的设计原则。可以说，设计原则是设计模式的灵魂。</h6><h5 id="三大基本面向对象设计原则-1-针对接口编程，而不是针对实现编程-；2。优先使用对象组全，而不是类继承；3-封装变化点。"><a href="#三大基本面向对象设计原则-1-针对接口编程，而不是针对实现编程-；2。优先使用对象组全，而不是类继承；3-封装变化点。" class="headerlink" title="三大基本面向对象设计原则:1.针对接口编程，而不是针对实现编程 ；2。优先使用对象组全，而不是类继承；3.封装变化点。"></a>三大基本面向对象设计原则:1.针对接口编程，而不是针对实现编程 ；2。优先使用对象组全，而不是类继承；3.封装变化点。</h5><h3 id="1-单一职责原则（SRP）"><a href="#1-单一职责原则（SRP）" class="headerlink" title="1.单一职责原则（SRP）"></a>1.单一职责原则（SRP）</h3><p>单一职责原则（SRP），就一个类而言，应该仅有一个引起它变化的原因。也就是说，不要把变化原因各不相同的职责放在一起，因为不同的变化会影响到不相干的职责。再通俗一点地说就是，不该你管的事情你不要管，管好自己的事情就可以了，多管闲事害了自己也害了别人。<br>在软件设计中，如果一个类承担的职责过多，就等于吧这些职责耦合在一起，而一个职责的变化可能会削弱和抑制这个类完成其他职责的能力。这耦合会导致脆弱的设计，当变化发生时，设计会遭受到意想不到的破坏。<br>软件设计真正要做的许多内容，就是发现职责并把那些职责相互分离。如果多于一个的动机去改变一个类，那么这个类就具有多余一个的职责，就应该要考虑类的职责分离。</p>
+<h3 id="2-开放-封闭原则（The-Open-Closed-Principle-简称OCP）"><a href="#2-开放-封闭原则（The-Open-Closed-Principle-简称OCP）" class="headerlink" title="2.开放-封闭原则（The Open-Closed Principle 简称OCP）"></a>2.开放-封闭原则（The Open-Closed Principle 简称OCP）</h3><p>开放-封闭原则，或叫开-闭原则，是说软件实体(类、模块、函数等)应该是可以扩展的，但是不可修改。不修改的意思就是是“你可以随便增加新的类，但是不要修改原来的类”。从这个角度去理解就好多了，其实这里还是一个隔离变化的问题。<br>这个原则的两个特征：一个是对于扩展是开放的；另一个是对于更改是封闭的。<br>我们在设计开发任何系统时，都不可能指望系统一开始就需求确定，就不再变化（要这样就太幸福了，哈哈），这是不现实的也是不科学的想法。既然需求是有一定变化的，那么如何在面对需求变化时，设计的程序可以相对容易的修改，不至于说，新需求一来，就要把整个程序推倒重来(这样会让程序员疯了不可，哈哈，你不想疯吧)。怎样的设计才能面对需求的改变却可以保持相对稳定，从而使得系统可以在第一个版本以后不断推出的新版本呢？开放-封闭原则就是我们的答案。<br>在程序设计时，我们要时刻考虑尽量把类设计的足够好，写好了就不要去修改，如果有新的需求来了，我们增加一些类来完成新的需求，原来的代码能不动就不动。<br>绝对的对修改关闭是不可能的，无论模块是多么的封闭，都会存在一些无法对之封闭的变化，既然不能完全封闭，设计人员必须对他设计的模块应该对那种变化封闭做出抉择、他必须事先猜测出最有可能发生变化的变化种类，然后构建抽象来隔离那些变化。<br>开放-封闭原则是面向对象设计的核心所在。遵循这个原则可以带来面向对象技术所生成的巨大好处，也就是可维护、可扩展、可复用、灵活性好。开发人员应该仅对程序中呈现出频繁变化的部分都做出抽象，然后，对于应用程序中的每部分都刻意定进行抽象同样不是一个好主意，拒绝不成熟的抽象和抽象本身一样重要。</p>
+<h3 id="3-依赖倒转原则"><a href="#3-依赖倒转原则" class="headerlink" title="3.依赖倒转原则"></a>3.依赖倒转原则</h3><p>依赖倒转原则：抽象不应该依赖于细节。细节应该依赖于抽象；高层不应该依赖于底层，两者都应该依赖于抽象。说白了就是要针对接口编程，不要针对实现编程。抽象的东西才是最稳定的，也就是说，我们依赖的是它的稳定。<br>依赖倒转其实可以说是面向对象设计的标志，用哪种语言来编写程序不重要，如果编写是考虑的都是如何针对抽象编程而不是针对细节编程，即程序中的所有的依赖关系都是终止与抽象类或者接口，那就是面向对象的设计，反之就是过程化设计了。</p>
+<h3 id="4-里氏代换原则"><a href="#4-里氏代换原则" class="headerlink" title="4.里氏代换原则"></a>4.里氏代换原则</h3><p>里氏代换原则（LSP）：子类型必须能够替换掉他的父类型。说白了就是一个软件实体如果使用的是一个父类的话，那么一定适用于其子类，而他察觉不出父类对象和子类对象的区别，也就是说，在软件里面，把父类都替换成他的子类，程序行为没有变化。<br>有了里氏替换原则，才是继承服用成为可能，只有当子类可以替换掉父类时，软件的功能不受到影响，父类才能真正被复用，而子类也能够在父类的基础上增加新的行为。<br>有了里氏代换原则，才能使开放-封闭原则成为可能，正是由于子类型的可替换性才使得父类型的模块在无需修改的情况下扩展。</p>
+<h3 id="5-接口隔离原则-ISP"><a href="#5-接口隔离原则-ISP" class="headerlink" title="5.接口隔离原则(ISP)"></a>5.接口隔离原则(ISP)</h3><p>接口隔离原则(ISP):不应该强迫客户依赖于它们不用的方法。接口属于客户，不属于它所在的类层次结构。这个说得很明白了，再通俗点说，不要强迫客户使用它们不用的方法，如果强迫用户使用它们不使用的方法，那么这些客户就会面临由于这些不使用的方法的改变所带来的改变。</p>
+<h3 id="6-迪米特法则（LoD）"><a href="#6-迪米特法则（LoD）" class="headerlink" title="6.迪米特法则（LoD）"></a>6.迪米特法则（LoD）</h3><p>迪米特法则（Law of Demeter或简写LoD）又叫最少知识原则（Least Knowledge Principle或简写为LKP）:如果两个类不彼此之间直接通信，那么这两个类就不应当发生直接的相互作用。如果其中一个类需要调用另一个类的某个方法的话，可以通过第三者转发这个调用。迪米特法则首先强调的前提是在类的结构设计上，每一个类都应当尽量降低成员的访问权限。迪米特法则其根本思想强调的是类之间的松耦合。类之间的耦合越弱，越利于复用，一个处于弱耦合的类被修改，不会对有关系的类造成波及。</p>
+<h3 id="7-合成-聚合复用原则（Composite-Aggregate-Reuse-Principle或CARP）"><a href="#7-合成-聚合复用原则（Composite-Aggregate-Reuse-Principle或CARP）" class="headerlink" title="7.合成/聚合复用原则（Composite/Aggregate Reuse Principle或CARP）"></a>7.合成/聚合复用原则（Composite/Aggregate Reuse Principle或CARP）</h3><p>合成/聚合复用原则（Composite/Aggregate Reuse Principle或CARP）：经常又叫做合成复用原则（Composite Reuse Principle或CRP），就是在一个新的对象里面使用一些已有的对象，使之成为新对象的一部分；新对象通过向这些对象的委派达到复用已有功能的目的。我白了就是要尽量使用合成/聚合，尽量不要使用继承。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://silenceyixia.github.io/2017/12/21/设计模式总结/" data-id="cjbgcn8rq00005onf6hs6eq3b" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java-设计模式/">java 设计模式</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-commitallowingstateloss-和commit的区别" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/11/20/commitallowingstateloss-和commit的区别/" class="article-date">
@@ -214,7 +259,7 @@ FragmentManager.BackStackEntry, Runnable {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://silenceyixia.github.io/2017/11/20/commitallowingstateloss-和commit的区别/" data-id="cja80cqhv000094nfwreykii6" class="article-share-link">Share</a>
+      <a data-url="http://silenceyixia.github.io/2017/11/20/commitallowingstateloss-和commit的区别/" data-id="cjbgc9q0q0003vonfxqw7b07g" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
@@ -409,7 +454,7 @@ mMediaPlayer.setDataSource(getApplicationContext(), contentUri);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://silenceyixia.github.io/2017/10/31/about-media/" data-id="cja808new0000h0nfn3urv6p3" class="article-share-link">Share</a>
+      <a data-url="http://silenceyixia.github.io/2017/10/31/about-media/" data-id="cjbgc9q090000vonf7135rpmr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android-mediaplayer-视频-音频/">android mediaplayer 视频 音频</a></li></ul>
@@ -433,7 +478,7 @@ mMediaPlayer.setDataSource(getApplicationContext(), contentUri);
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/android-mediaplayer-视频-音频/">android mediaplayer 视频 音频</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/android-mediaplayer-视频-音频/">android mediaplayer 视频 音频</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java-设计模式/">java 设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
     </div>
   </div>
 
@@ -443,7 +488,7 @@ mMediaPlayer.setDataSource(getApplicationContext(), contentUri);
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/标签-源码分析/" style="font-size: 10px;">标签:源码分析</a>
+      <a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-源码分析/" style="font-size: 10px;">标签:源码分析</a>
     </div>
   </div>
 
@@ -452,7 +497,7 @@ mMediaPlayer.setDataSource(getApplicationContext(), contentUri);
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">十一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a></li></ul>
     </div>
   </div>
 
@@ -463,6 +508,10 @@ mMediaPlayer.setDataSource(getApplicationContext(), contentUri);
     <h3 class="widget-title">最新文章</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/12/21/设计模式总结/">设计模式总结</a>
+          </li>
         
           <li>
             <a href="/2017/11/20/commitallowingstateloss-和commit的区别/">commitallowingstateloss 和commit的区别</a>
