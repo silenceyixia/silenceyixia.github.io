@@ -109,7 +109,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-源码分析/" style="font-size: 10px;">标签:源码分析</a>
+						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a>
 					</div>
 				</section>
 				
@@ -166,6 +166,321 @@
 	</div>
 </nav>
       <div class="body-wrap">
+  
+    <article id="post-AsyncTask 源码学习" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/03/05/AsyncTask 源码学习/" class="article-date">
+  	<time datetime="2018-03-04T16:00:00.000Z" itemprop="datePublished">2018-03-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/05/AsyncTask 源码学习/">
+        AsyncTask源码学习
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>由于android中UI线程（主进程）是线程不安全的，如果想要在子线程进行更新UI操作，就需要借助android的异步消息处理机制，在android中实<br>现异步处理机制有两种方式：Handler和AsyncTask.这两种方式平时也经常用到。最近我心血来潮就想了解一下AsyncTask内部源码到底是如何实现的?毕竟知其然且知其所以然会对让自己对AsyncTask的了解更近一步，同时也可以学习一下AsyncTask设计的思路。</p>
+<h2 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h2><h3 id="注：这是基于android-25的AsyncTask源码解析。"><a href="#注：这是基于android-25的AsyncTask源码解析。" class="headerlink" title="注：这是基于android-25的AsyncTask源码解析。"></a>注：这是基于android-25的AsyncTask源码解析。</h3><h6 id="首先打开AsyncTask-java文件找到定义："><a href="#首先打开AsyncTask-java文件找到定义：" class="headerlink" title="首先打开AsyncTask.java文件找到定义："></a>首先打开<strong>AsyncTask.java</strong>文件找到定义：</h6><pre><code>  public abstract class AsyncTask&lt;Params, Progress, Result&gt; {
+      ......
+}
+</code></pre><p>可以看到AsyncTask是一个<strong>抽象类</strong>，所以使用它就需要继承并实现其抽象方法 <strong>doInbackground()</strong> 方法；</p>
+<h6 id="使用过-AsyncTask-异步的都知道，任务执行的入口是-excute-方法："><a href="#使用过-AsyncTask-异步的都知道，任务执行的入口是-excute-方法：" class="headerlink" title="使用过 AsyncTask 异步的都知道，任务执行的入口是 excute() 方法："></a>使用过 <strong>AsyncTask</strong> 异步的都知道，任务执行的入口是 <strong>excute()</strong> 方法：</h6><pre><code>//方法１
+ public final AsyncTask&lt;Params, Progress, Result&gt; execute(Params... params) {
+    return executeOnExecutor(sDefaultExecutor, params);
+}    
+
+//方法２
+public final AsyncTask&lt;Params, Progress, Result&gt; executeOnExecutor(Executor exec,Params... params) {
+
+    if (mStatus != Status.PENDING) {
+        switch (mStatus) {
+            case RUNNING:
+                throw new IllegalStateException(&quot;Cannot execute task:&quot;
+                        + &quot; the task is already running.&quot;);
+            case FINISHED:
+                throw new IllegalStateException(&quot;Cannot execute task:&quot;
+                        + &quot; the task has already been executed &quot;
+                        + &quot;(a task can be executed only once)&quot;);
+        }
+    }
+
+    mStatus = Status.RUNNING;
+
+    onPreExecute();
+
+    mWorker.mParams = params;
+    exec.execute(mFuture);
+
+    return this;
+   }
+</code></pre><p>根据上面的代码，可以发现只需研究 <strong>executeOnExecutor()</strong> 方法就行。分析如下：</p>
+<hr>
+<h5 id="首先对-mStatus-进行了判断，mStatus-初始化："><a href="#首先对-mStatus-进行了判断，mStatus-初始化：" class="headerlink" title="首先对 mStatus 进行了判断，mStatus 初始化："></a>首先对 <strong>mStatus</strong> 进行了判断，<strong>mStatus</strong> 初始化：</h5><pre><code>private volatile Status mStatus = Status.PENDING
+</code></pre><p>PENDING 指示任务尚未执行， </p>
+<h5 id="接着执行："><a href="#接着执行：" class="headerlink" title="接着执行："></a>接着执行：</h5><pre><code>mStatus = Status.RUNNING;
+</code></pre><p>将 <strong>mStatus</strong> 置为 <strong>RUNNING</strong> </p>
+<h5 id="然后调用了-onPreExecute-方法，子类通过重写该方法用于异步任务执行前进行一些预备工作"><a href="#然后调用了-onPreExecute-方法，子类通过重写该方法用于异步任务执行前进行一些预备工作" class="headerlink" title="然后调用了 onPreExecute() 方法，子类通过重写该方法用于异步任务执行前进行一些预备工作"></a>然后调用了 <strong>onPreExecute()</strong> 方法，子类通过重写该方法用于异步任务执行前进行一些预备工作</h5><h5 id="接下来可以看到-mWorker-mParams-的赋值，那么-mWorker-是什么？什么时候初始化的？"><a href="#接下来可以看到-mWorker-mParams-的赋值，那么-mWorker-是什么？什么时候初始化的？" class="headerlink" title="接下来可以看到 mWorker.mParams 的赋值，那么 mWorker 是什么？什么时候初始化的？"></a>接下来可以看到 <strong>mWorker.mParams</strong> 的赋值，那么 <strong>mWorker</strong> 是什么？什么时候初始化的？</h5><pre><code>private final WorkerRunnable&lt;Params, Result&gt; mWorker;
+
+private static abstract class WorkerRunnable&lt;Params, Result&gt; implements Callable&lt;Result&gt; {
+       Params[] mParams;
+}
+
+public interface Callable&lt;V&gt; {
+    V call() throws Exception;
+}
+</code></pre><p>可以看到 <strong>WorkerRunnable抽象类</strong>，原来 <strong>executeOnExecutor(Executor exec,Params… params)</strong> 方法传入的 <strong>Params</strong> 可变参数是赋给了 <strong>WorkerRunnable</strong> 类的唯一的字段 <strong>mParams</strong> ，<strong>WorkerRunnable</strong> 是 <strong>Callable接口</strong> 的子类，查阅资料后发现其实 <strong>Callable</strong> 和 <strong>Runnable</strong> 是一样的作用，不过 <strong>Callable</strong> 的 <strong>call()</strong> 方法是有返回值的，而且可以抛异常，那么 <strong>WorkerRunnable</strong> 实现 <strong>Callable</strong> 的意义在何在？接着看源码找到了 <strong>mWorker</strong> 的初始化—&gt; 在 <strong>AsyncTask</strong> 的构造方法中：</p>
+<pre><code>public AsyncTask() {
+    mWorker = new WorkerRunnable&lt;Params, Result&gt;() {
+        public Result call() throws Exception {
+        mTaskInvoked.set(true);
+        Result result = null;
+        try {
+           Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+           //noinspection unchecked
+           result = doInBackground(mParams);
+           Binder.flushPendingCommands();
+        } catch (Throwable tr) {
+           mCancelled.set(true);
+           throw tr;
+        } finally {
+           postResult(result);
+        }
+           return result;
+        }
+   };
+
+  mFuture = new FutureTask&lt;Result&gt;(mWorker) {
+      @Override
+      protected void done() {
+         try {
+            postResultIfNotInvoked(get());
+         } catch (InterruptedException e) {
+            android.util.Log.w(LOG_TAG, e);
+         } catch (ExecutionException e) {
+            throw new RuntimeException(&quot;An error occurred while executing doInBackground()&quot;,e.getCause());
+         } catch (CancellationException e) {
+            postResultIfNotInvoked(null);
+         }
+      }
+   };
+}
+</code></pre><p>不仅看到了 <strong>WorkerRunnable</strong> 的实例化，还有一个 <strong>FutureTask</strong> 的实例化，而且 <strong>WorkerRunnable</strong> 是 作为参数传入了 <strong>FutureTask</strong> 的构造函数中，接下来看看 <strong>FutureTask</strong> 又是什么样的存在？</p>
+<pre><code>public class FutureTask&lt;V&gt; implements RunnableFuture&lt;V&gt; {
+    //......
+    public FutureTask(Callable&lt;V&gt; callable) {
+         if (callable == null)
+            throw new NullPointerException();
+         this.callable = callable;
+         this.state = NEW;       // ensure visibility of callable
+    }
+    ......
+}
+
+public interface RunnableFuture&lt;V&gt; extends Runnable, Future&lt;V&gt; {        
+    void run();    
+}
+
+interface Runnable {
+    public abstract void run();
+}
+
+public interface Future&lt;V&gt; {
+
+    boolean cancel(boolean mayInterruptIfRunning);
+
+    boolean isCancelled();
+
+    boolean isDone();
+
+    V get() throws InterruptedException, ExecutionException;
+
+    V get(long timeout, TimeUnit unit)throws InterruptedException, ExecutionException, TimeoutException;
+}
+</code></pre><p>现在知道 <strong>mWorker(WorkerRunnable)</strong> 是 <strong>mFuture(FutureTask)</strong> 中的一个成员，而且 <strong>FutureTask</strong> 实现了<br><strong>RunnableFuture</strong><br>    <strong>Runnable</strong>，<strong>Future</strong> 三个接口，<strong>RunnableFuture接口</strong> 的作用就是将其他两个接口整合到一起。<strong>Future</strong> 接口是用来干嘛的？ 留到后面分析。</p>
+<h5 id="最后来看最重要的一步："><a href="#最后来看最重要的一步：" class="headerlink" title="最后来看最重要的一步："></a>最后来看最重要的一步：</h5><pre><code>exec.execute(mFuture);
+</code></pre><p><strong>exec</strong> 是什么，从哪里来的？正是最初执行 <strong>execute(Params… params)</strong> –&gt;<strong>executeOnExecutor(Executor exec,Params… params)</strong> 从参数传进来的,来看看具体是怎么回事：</p>
+<pre><code>public final AsyncTask&lt;Params, Progress, Result&gt; execute(Params... params) {
+    return executeOnExecutor(sDefaultExecutor, params);
+}
+
+private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;
+
+private static class SerialExecutor implements Executor {
+
+       final ArrayDeque&lt;Runnable&gt; mTasks = new ArrayDeque&lt;Runnable&gt;();
+       Runnable mActive;
+
+    public synchronized void execute(final Runnable r) {
+         mTasks.offer(new Runnable() {
+            public void run() {
+              try {
+                r.run();
+              } finally {
+                scheduleNext();
+              }
+            }
+         });
+
+         if (mActive == null) {
+            scheduleNext();
+         }
+    }
+
+   protected synchronized void scheduleNext() {
+         if ((mActive = mTasks.poll()) != null) {
+            THREAD_POOL_EXECUTOR.execute(mActive);
+         }
+   }
+}
+
+public interface Executor {    
+    void execute(Runnable command);
+}
+</code></pre><p>这块可以看到由 <strong>mTasks(ArrayDeque)</strong> 将 <strong>r(Runnable)</strong> 加入了 <strong>mTask</strong> 的队尾，其实 <strong>r</strong> 就是前面说到的<strong>mFuture(FutureTask)</strong>,<br><strong>ArrayDeque</strong>是java里面一种数据结构(双端队列)的实现类，能够无限扩展队列大小，具体我也没有过多研究，有空再了解一下 <strong>ArrayDeque</strong> 源码。</p>
+<p>辗转反侧来到了 </p>
+<pre><code>THREAD_POOL_EXECUTOR.execute(mActive);
+</code></pre><p>由 <strong>线程池THREAD_POOL_EXECUTOR</strong> 来执行了 <strong>mActive</strong>, 这个 <strong>mActive</strong> 也就是从 <strong>mTask</strong> 中取出来的 <strong>mFuture</strong> ,因为 <strong>FutureTask</strong> 是 <strong>Runnabe</strong> 的子类，那也就是说会调用 <strong>FutureTask</strong> 类的 <strong>run()</strong><br>方法，也就是说<strong>从这里开始就是在子线程开始执行任务</strong>了，找到 <strong>run()</strong> 方法源码：</p>
+<pre><code>public void run() {
+     if (state != NEW ||!U.compareAndSwapObject(this, RUNNER, null, Thread.currentThread()))
+        return;
+     try {
+        Callable&lt;V&gt; c = callable;
+           if (c != null &amp;&amp; state == NEW) {
+              V result;
+              boolean ran;
+              try {
+                 result = c.call();
+                 ran = true;
+              } catch (Throwable ex) {
+                 result = null;
+                 ran = false;
+                 setException(ex);
+              }
+              if (ran)
+                 set(result);
+              }
+      } finally {
+      ......
+    }
+}
+</code></pre><p>找到了核心代码：</p>
+<pre><code>result = c.call();
+</code></pre><p>可以看到调用 <strong>c</strong> 的 <strong>call()</strong> 方法，这个 <strong>c</strong> 就是 初始化 <strong>mFuture(FutureTask)</strong> 的时候传进来的 <strong>mWorker(WorkerRunnable)</strong> ，回去找 <strong>mWorker</strong> 去：</p>
+<pre><code>mWorker = new WorkerRunnable&lt;Params, Result&gt;() {
+    public Result call() throws Exception {
+         mTaskInvoked.set(true);
+         Result result = null;
+         try {
+               Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            //noinspection unchecked
+            result = doInBackground(mParams);
+            Binder.flushPendingCommands();
+         } catch (Throwable tr) {
+            mCancelled.set(true);
+            throw tr;
+         } finally {
+            postResult(result);
+         }
+            return result;
+    }
+};
+</code></pre><p>哈哈，终于知道了 <strong>doInBackground()</strong>方法的调用时机，<strong>result</strong> 就是 <strong>doInBackground()</strong> 方法执行完返回的结果，接着看到 <strong>finally</strong>代码块里面的 <strong>postResult()</strong> 方法：</p>
+<pre><code>postResult(result);
+
+private Result postResult(Result result) {
+    @SuppressWarnings(&quot;unchecked&quot;)
+    Message message = getHandler().obtainMessage(MESSAGE_POST_RESULT,
+             new AsyncTaskResult&lt;Result&gt;(this, result));
+    message.sendToTarget();
+    return result;
+} 
+
+private static Handler getHandler() {
+    synchronized (AsyncTask.class) {
+       if (sHandler == null) {
+          sHandler = new InternalHandler();
+       }
+       return sHandler;
+    }
+ }
+
+private static class InternalHandler extends Handler {
+     public InternalHandler() {
+        super(Looper.getMainLooper());
+     }
+
+     @SuppressWarnings({&quot;unchecked&quot;, &quot;RawUseOfParameterizedType&quot;})
+        @Override
+        public void handleMessage(Message msg) {
+        AsyncTaskResult&lt;?&gt; result = (AsyncTaskResult&lt;?&gt;) msg.obj;
+            switch (msg.what) {
+                case MESSAGE_POST_RESULT:
+                    // There is only one result
+                    result.mTask.finish(result.mData[0]);
+                    break;
+                case MESSAGE_POST_PROGRESS:
+                        result.mTask.onProgressUpdate(result.mData);
+                    break;
+            }
+       }
+}
+
+private void finish(Result result) {
+   if (isCancelled()) {
+      onCancelled(result);
+   } else {
+      onPostExecute(result);
+   }
+   mStatus = Status.FINISHED;
+}
+</code></pre><p>到现在终于真相大白了，直接看 <strong>InternalHandler</strong> 的初始化–&gt; <strong>Looper.getMainLooper()</strong>,用的就是 <strong>主线程(UI线程)的Handler</strong>，接着看结果回调—&gt; <strong>result.mTask.finish(result.mData[0]);</strong> 最后–&gt; <strong>onPostExecute(result);</strong> </p>
+<hr>
+<p>到这里整个AsyncTask异步任务也就全部完成了。这仅是我在 学习 AsyncTask源码后的个人分析。 </p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
+	</div>
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
   
     <article id="post-设计模式总结" class="article article-type-post" itemscope itemprop="blogPost">
   
