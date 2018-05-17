@@ -109,7 +109,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a>
+						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a>
 					</div>
 				</section>
 				
@@ -166,6 +166,241 @@
 	</div>
 </nav>
       <div class="body-wrap">
+  
+    <article id="post-高德地图加载瓦片分析" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/05/17/高德地图加载瓦片分析/" class="article-date">
+  	<time datetime="2018-05-17T09:37:36.000Z" itemprop="datePublished">2018-05-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/05/17/高德地图加载瓦片分析/">
+        高德地图加载瓦片分析
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>##了解瓦片地图<br><strong><code>瓦片地图</code></strong>：瓦片地图金字塔模型是一种多分辨率层次模型，从瓦片金字塔的底层到顶层，分辨率越来越低，但表示的地理范围不变。首先确定地图服务平台所要提供的缩放级别的数量N，把缩放级别最高、地图比例尺最大的地图图片作为金字塔的底层，即第0层，并对其进行分块，从地图图片的左上角开始，从左至右、从上到下进行切割，分割成相同大小(比如256x256像素)的正方形地图瓦片，形成第0层瓦片矩阵;在第0层地图图片的基础上，按每2x2像素合成为一个像素的方法生成第1层地图图片，并对其进行分块，分割成与下一层相同大小的正方形地图瓦片，形成第1层瓦片矩阵;采用同样的方法生成第2层瓦片矩阵;…;如此下去，直到第N一1层，构成整个瓦片金字塔———————— <code>来自百度百科</code></p>
+<p>首先，我们先分析一下高德地图，高德有2D和3D两种地图,2D地图栅栏地图（属于瓦片地图），采用切的方式显示地图，而3D地图为矢量地图，采用终端绘制地图的样式，地图功能更丰富一些。所以用高德地图要想成功的加载出来自定义的瓦片，一定要用高德里面提供的 <strong>2D地图</strong>的SDK 否则没有任何效果。</p>
+<p><img src="https://github.com/silenceyixia/silenceyixia.github.io/raw/master/pics/gaode_titl_detail.jpg" alt="avatar"></p>
+<p>现在地图相关业务的需求已很是常见，但有时候不免会有一些定制、个性化的需求，比如地图加载自定义瓦片就是这样的一个需求，今天就高德地图加载瓦片进行一番分析：</p>
+<p>##分析</p>
+<p>###1.集成高德地图<br>申请key等等的流程就不叙述了</p>
+<p>implementation ‘com.amap.api:map2d:5.0.1’</p>
+<p><strong>布局文件：</strong></p>
+<pre><code>&lt;FrameLayout
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    &gt;
+
+       &lt;com.amap.api.maps2d.MapView
+           android:id=&quot;@+id/map_view&quot;
+           android:layout_width=&quot;match_parent&quot;
+           android:layout_height=&quot;match_parent&quot;
+      /&gt;
+
+&lt;/FrameLayout&gt;
+</code></pre><p><strong>MainActivity</strong>就不多说了：</p>
+<pre><code>import android.app.Activity;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
+import com.amap.api.maps2d.AMap;
+import com.amap.api.maps2d.MapView;
+import com.amap.api.maps2d.model.TileOverlay;
+import com.amap.api.maps2d.model.TileOverlayOptions;
+import com.amap.api.maps2d.model.UrlTileProvider;
+
+import java.net.URL;
+
+public class MainActivity extends Activity{
+    private MapView mMapView;
+    private AMap aMap;
+    private TileOverlay mtileOverlay;
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    mMapView = (MapView) findViewById(R.id.map_view);
+    mMapView.onCreate(savedInstanceState);//必须的
+    if (aMap == null) {
+        aMap = mMapView.getMap();
+    }
+     //移动中心点到故宫
+    aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(39.918255, 116.397369), 15));
+}
+
+@Override
+protected void onResume() {
+    super.onResume();
+    //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
+    mMapView.onResume();
+    //我们可以在这里进行离线瓦片的加载(在线瓦片和离线瓦片一样只不过一个是本地瓦片存储路径，一个是网络Url)
+    loadOffLineMap();
+}
+
+@Override
+protected void onPause() {
+    super.onPause();
+    //在activity执行onPause时执行mMapView.onPause ()，暂停地图的绘制
+    mMapView.onPause();
+}
+
+@Override
+protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    mMapView.onSaveInstanceState(outState);//保存地图当前的状态
+}
+
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
+    mMapView.onDestroy();
+}
+
+/**
+ * 加载离线线瓦片数据
+ */
+private void loadOffLineMap() {
+    final String url = &quot;/storage/emulated/0/amap/tilecache&quot;;
+    TileOverlayOptions tileOverlayOptions = 
+    new TileOverlayOptions().tileProvider(new LocalTileProvider(url));
+    tileOverlayOptions.diskCacheEnabled(true)
+            .diskCacheDir(&quot;/storage/emulated/0/amap/OMCcache&quot;)
+            .diskCacheSize(100000)
+            .memoryCacheEnabled(true)
+            .memCacheSize(100000)
+            .zIndex(-9999);
+    mtileOverlay = aMap.addTileOverlay(tileOverlayOptions);
+}
+
+//实现TitlProvider 用于加载本瓦片
+class LocalTileProvider implements  TileProvider{
+
+    private static final int TILE_WIDTH = 256;
+    private static final int TILE_HEIGHT = 256;
+    public static final int BUFFER_SIZE = 16 * 1024;
+    private String tilePath;
+
+    public LocalTileProvider(String path) {
+        tilePath=path;
+    }
+
+    @Override
+    public Tile getTile(int x, int y, int zoom) {
+        byte[] image = readTileImage(x, y, zoom);
+        return image == null ? null : new Tile(TILE_WIDTH, TILE_HEIGHT, image);
+    }
+
+       private byte[] readTileImage(int x, int y, int zoom) {
+        InputStream in = null;
+        ByteArrayOutputStream buffer = null;
+        File f = new File(getTileFilename(x, y, zoom));
+        if(f.exists()){
+            try {
+                buffer = new ByteArrayOutputStream();
+                in = new FileInputStream(f);
+                int nRead;
+                byte[] data = new byte[BUFFER_SIZE];
+                while ((nRead = in.read(data, 0, BUFFER_SIZE)) != -1) {
+                buffer.write(data, 0, nRead);
+                }
+                buffer.flush();
+                return buffer.toByteArray();
+               } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+               } catch (OutOfMemoryError e) {
+                e.printStackTrace();
+                return null;
+            } finally {
+                    if (in != null)
+                    try {
+                        in.close(); 
+                     } catch (Exception e) {
+                      }
+                 if (buffer != null)
+                    try {
+                        buffer.close(); 
+                    } catch (Exception e) {
+                    }
+                  }
+        }else{
+            return null;
+           }
+       }
+
+    private String getTileFilename(int x, int y, int zoom) {
+          //这里一定要注意，由于瓦片都是由专门的切图工具生成，这个x,y指的是切片工具根据该瓦片在地图上中心点经纬度的
+            所生成的固定的值，所以瓦片图片的名字千万不要随意改动，而这个z值则是当前地图缩放级别，当你缩放地图时高德
+            地图就会不停的监控地图级别然后在指定的本地路径查找对应的瓦片进行加载
+            return tilePath + &quot;/&quot; + x + &quot;_&quot; + y + &quot;_&quot; + zoom + &quot;.png&quot;;
+    }
+
+    @Override
+    public int getTileWidth() {
+        return TILE_HEIGHT;
+    }
+
+    @Override
+    public int getTileHeight() {
+        return TILE_WIDTH;
+    }
+  }
+}
+</code></pre><p><strong>且看效果图:</strong></p>
+<p><img src="https://github.com/silenceyixia/silenceyixia.github.io/raw/master/pics/gaode_titl_shot.png" alt="avatar"></p>
+<p>##项目源码<br><a href="https://github.com/silenceyixia/KotlinTestDaily" title="高德地图加载本地瓦片项目源码" target="_blank" rel="external">kotlin版</a></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签：高德地图/">标签：高德地图</a></li></ul>
+	</div>
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
   
     <article id="post-AsyncTask 源码学习" class="article article-type-post" itemscope itemprop="blogPost">
   
