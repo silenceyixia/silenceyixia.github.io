@@ -109,7 +109,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a>
+						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：多线程/" style="font-size: 10px;">标签：多线程</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a>
 					</div>
 				</section>
 				
@@ -166,6 +166,113 @@
 	</div>
 </nav>
       <div class="body-wrap">
+  
+    <article id="post-Semaphore学习" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/05/17/Semaphore学习/" class="article-date">
+  	<time datetime="2018-05-17T09:37:36.000Z" itemprop="datePublished">2018-05-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/05/17/Semaphore学习/">
+        Semaphore 类的学习使用
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>##semaphore</p>
+<p><strong>1.semaphore是什么？</strong></p>
+<p>信号量（semaphore）,有时被称为信号灯，是在多线程环境下使用的一种设施，它负责协调各个线程，以保证他们能够合理的使用公共资源。</p>
+<p>semaphore分为单值和多值两种，前者只能被一个线程获得，后者可以被多个线程获得。</p>
+<p>单个信号量的Semaphore对象可以实现互斥锁的功能，并且可以是由一个线程获得了“锁”，再由另一个线程释放“锁”，这可应用于死锁恢复的一些场合。</p>
+<p><strong>2.主要方法</strong></p>
+<pre><code>Semaphore semaphore = new Semaphore(int count);
+</code></pre><p>信号量Semaphore的初始化方法，初始值 count 表示当前的信号量，即当前所允许并发访问的线程数。</p>
+<pre><code>semaphore.acquire();
+</code></pre><p>表示获得一个许可，若信号量中的许可数已为0，则这个函数会出现等待的状况； 若已获取许可，则这个信号量的许可数为减一；</p>
+<pre><code>semaphore.release();
+</code></pre><p>表示释放一个许可，若之前信号量的许可数已为0，那么当调用semaphore.release() 函数时，则此时的信号量中的许可数就会变为1；简而言之，就是将这个信号量中的许可数在原来的基础上 增加一个，而无论信号量之前的初始值是什么；</p>
+<pre><code>semaphore.availablePermits();
+</code></pre><p>表示信号量semaphore此刻所拥有的许可数的个数</p>
+<p><strong>3.实例</strong></p>
+<p>现在有一个三个信号灯，启动10个线程分别获取信号灯，当信号灯被占用时，其他线程只能等待，当信号灯被释放则等待线程获取信号灯。</p>
+<pre><code>   public class SemaphoreTest {
+     public static void main(String[] args) {
+         ExecutorService pool =  Executors.newCachedThreadPool();
+         final Semaphore semaphore = new Semaphore(3,true);
+
+         for (int i = 0; i &lt; 10; i++) {
+             Runnable runnable = new Runnable() {
+                 @Override
+                 public void run() {
+                    try {
+                        semaphore.acquire();//获取信号灯许可
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    System.out.println(&quot;Thread &quot;+Thread.currentThread().getName()+&quot; 进入&quot; +&quot;当前系统的并发数是：&quot;+(3-semaphore.availablePermits()));
+                    try {
+                        Thread.sleep(new Random().nextInt(1000));
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    System.out.println(&quot;Thread &quot;+Thread.currentThread().getName()+&quot; 即将离开&quot;);
+                    semaphore.release();//释放信号灯
+                    System.out.println(&quot;Thread &quot;+Thread.currentThread().getName()+&quot; 已经离开，当前系统的并发数是：&quot;+(3-semaphore.availablePermits()));
+                }
+            };
+            pool.execute(runnable);
+
+        }
+    }
+}
+</code></pre><p>另外需要注意的一点是，信号灯可以由一个线程使用，然后由另一个线程来进行释放，而锁只能由同一个线程启动和释放，不然就好发生死锁，这一点需要格外注意。</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签：多线程/">标签：多线程</a></li></ul>
+	</div>
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
   
     <article id="post-高德地图加载瓦片分析" class="article article-type-post" itemscope itemprop="blogPost">
   
