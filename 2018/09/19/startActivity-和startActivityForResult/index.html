@@ -3,19 +3,24 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Tag: 标签:源码分析 | Silenceyixia_博客</title>
+  <title>startActivity()和startActivityForResult() | Silenceyixia_博客</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Silenceyixia_博客">
-<meta property="og:url" content="http://silenceyixia.github.io/tags/标签-源码分析/index.html">
+  <meta name="description" content="#####今天在写项目的时候碰到了一个以前没接触过的一个坑。具体是这样的：    项目中有一块代码原本是内嵌在一个Fragment中，在这个碎片中使用到了startActivityForResult()方法">
+<meta name="keywords" content="标签:日常踩坑">
+<meta property="og:type" content="article">
+<meta property="og:title" content="startActivity()和startActivityForResult()">
+<meta property="og:url" content="http://silenceyixia.github.io/2018/09/19/startActivity-和startActivityForResult/index.html">
 <meta property="og:site_name" content="Silenceyixia_博客">
+<meta property="og:description" content="#####今天在写项目的时候碰到了一个以前没接触过的一个坑。具体是这样的：    项目中有一块代码原本是内嵌在一个Fragment中，在这个碎片中使用到了startActivityForResult()方法">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-09-19T09:34:19.465Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Silenceyixia_博客">
+<meta name="twitter:title" content="startActivity()和startActivityForResult()">
+<meta name="twitter:description" content="#####今天在写项目的时候碰到了一个以前没接触过的一个坑。具体是这样的：    项目中有一块代码原本是内嵌在一个Fragment中，在这个碎片中使用到了startActivityForResult()方法">
   
     <link rel="alternative" href="/atom.xml" title="Silenceyixia_博客" type="application/atom+xml">
   
@@ -165,102 +170,85 @@
 		</header>				
 	</div>
 </nav>
-      <div class="body-wrap">
+      <div class="body-wrap"><article id="post-startActivity-和startActivityForResult" class="article article-type-post" itemscope itemprop="blogPost">
   
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/05/AsyncTask 源码学习/" class="archive-article-date">
-  	<time datetime="2018-03-04T16:00:00.000Z" itemprop="datePublished">3月 5</time>
+    <div class="article-meta">
+      <a href="/2018/09/19/startActivity-和startActivityForResult/" class="article-date">
+  	<time datetime="2018-09-19T09:28:12.000Z" itemprop="datePublished">2018-09-19</time>
 </a>
-        </div>
-    	 
+    </div>
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/05/AsyncTask 源码学习/">
-        AsyncTask源码学习
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
         
-      </a>
+  
+    <h1 class="article-title" itemprop="name">
+      startActivity()和startActivityForResult()
+      
     </h1>
   
 
-        <div class="article-info info-on-left">
-          
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
-	</div>
-
-          
-
-          
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
+      </header>
       
-        </div></section>
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/11/20/commitallowingstateloss-和commit的区别/" class="archive-article-date">
-  	<time datetime="2017-11-20T09:23:55.000Z" itemprop="datePublished">11月 20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/11/20/commitallowingstateloss-和commit的区别/">
-        commitallowingstateloss 和commit的区别
+      <div class="article-info article-info-post">
         
-      </a>
-    </h1>
-  
-
-        <div class="article-info info-on-left">
-          
 	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-日常踩坑/">标签:日常踩坑</a></li></ul>
 	</div>
 
-          
+        
 
-          
-        </div>
+        
         <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
+      </div>
+      
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>#####今天在写项目的时候碰到了一个以前没接触过的一个坑。具体是这样的：<br>    项目中有一块代码原本是内嵌在一个Fragment中，在这个碎片中使用到了startActivityForResult()方法</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/09/19/startActivityForResult方法踩坑/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">startActivity()和startActivityForResult()</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="ds-share share" data-thread-key="startActivity-和startActivityForResult" data-title="startActivity()和startActivityForResult()" data-url="http://silenceyixia.github.io/2018/09/19/startActivity-和startActivityForResult/"  data-images="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg" data-content="startActivity()和startActivityForResult()">
+    <div class="ds-share-inline">
+      <ul  class="ds-share-icons-16">
+      	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+        <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+        <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+        <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+        <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+      </ul>
+      <div class="ds-share-icons-more">
+      </div>
+    </div>
+ </div>
+ 
+
+
+
+
 
 </div>
       <footer id="footer">
@@ -286,9 +274,9 @@
 		mathjax: true,
 		animate: true,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false
 	}

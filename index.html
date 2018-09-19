@@ -109,7 +109,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：多线程/" style="font-size: 10px;">标签：多线程</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a>
+						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-日常踩坑/" style="font-size: 20px;">标签:日常踩坑</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：多线程/" style="font-size: 10px;">标签：多线程</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a>
 					</div>
 				</section>
 				
@@ -166,6 +166,455 @@
 	</div>
 </nav>
       <div class="body-wrap">
+  
+    <article id="post-startActivity-和startActivityForResult" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/09/19/startActivity-和startActivityForResult/" class="article-date">
+  	<time datetime="2018-09-19T09:28:12.000Z" itemprop="datePublished">2018-09-19</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/19/startActivity-和startActivityForResult/">
+        startActivity()和startActivityForResult()
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>#####今天在写项目的时候碰到了一个以前没接触过的一个坑。具体是这样的：<br>    项目中有一块代码原本是内嵌在一个Fragment中，在这个碎片中使用到了startActivityForResult()方法</p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-日常踩坑/">标签:日常踩坑</a></li></ul>
+	</div>
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-startActivityForResult方法踩坑" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/09/19/startActivityForResult方法踩坑/" class="article-date">
+  	<time datetime="2018-09-19T09:28:12.000Z" itemprop="datePublished">2018-09-19</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/19/startActivityForResult方法踩坑/">
+        startActivity()和startActivityForResult()
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>今天在写项目的时候碰到了一个以前没接触过的一个坑.具体是这样的：</p>
+<p><strong>项目中有一块代码原本是内嵌在一个Fragment中，在这个碎片中使用到了startActivityForResult()方法，直接调用的是Fragment的<br>startActivityForResult()方法，是可以在onActivityResult()中拿到回调的。</strong></p>
+<p><strong>然而新的需求中，在一个Fragment中的多样式列表中有一块内容和上面的Fragment中的列表样式一模一样，我想着将这一样的内容进行封<br>装使用，在使用的时候由于封装的那块代码是在Fragment中列表的字列表中调用的，就无法直接使用Fragment中<br>的startActivityForResult()，使用的是getActivity().startActivityForResult(),但是竟然没有在Fragment中<br>onActivityResult()拿到回调，于是我查看了源码发现：</strong></p>
+<pre><code>Fragment.java中的startActivityForResult()是这样的：
+
+/**
+ * Call {@link Activity#startActivityForResult(Intent, int, Bundle)} from the fragment&apos;s
+ * containing Activity.
+ */
+public void startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) {
+    if (mHost == null) {
+        throw new IllegalStateException(&quot;Fragment &quot; + this + &quot; not attached to Activity&quot;);
+    }
+    mHost.onStartActivityFromFragment(this /*fragment*/, intent, requestCode, options);
+}
+
+ /**
+ * Called by Fragment.startActivityForResult() to implement its behavior.
+ */
+public void startActivityFromFragment(Fragment fragment, Intent intent,
+        int requestCode, @Nullable Bundle options) {
+    mStartedActivityFromFragment = true;
+    try {
+        if (requestCode == -1) {
+            ActivityCompat.startActivityForResult(this, intent, -1, options);
+            return;
+        }
+        checkForValidRequestCode(requestCode);
+        int requestIndex = allocateRequestIndex(fragment);
+        ActivityCompat.startActivityForResult(
+                this, intent, ((requestIndex + 1) &lt;&lt; 16) + (requestCode &amp; 0xffff), options);
+    } finally {
+        mStartedActivityFromFragment = false;
+    }
+}
+
+ public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,
+        @Nullable Bundle options) {
+    if (mParent == null) {
+        options = transferSpringboardActivityOptions(options);
+        Instrumentation.ActivityResult ar =
+            mInstrumentation.execStartActivity(
+                this, mMainThread.getApplicationThread(), mToken, this,
+                intent, requestCode, options);
+        if (ar != null) {
+            mMainThread.sendActivityResult(
+                mToken, mEmbeddedID, requestCode, ar.getResultCode(),
+                ar.getResultData());
+        }
+        if (requestCode &gt;= 0) {
+            // If this start is requesting a result, we can avoid making
+            // the activity visible until the result is received.  Setting
+            // this code during onCreate(Bundle savedInstanceState) or onResume() will keep the
+            // activity hidden during this time, to avoid flickering.
+            // This can only be done when a result is requested because
+            // that guarantees we will get information back when the
+            // activity is finished, no matter what happens to it.
+            mStartedActivity = true;
+        }
+
+        cancelInputsAndStartExitTransition(options);
+        // TODO Consider clearing/flushing other event sources and events for child windows.
+    } else {
+        if (options != null) {
+            mParent.startActivityFromChild(this, intent, requestCode, options);
+        } else {
+            // Note we want to go through this method for compatibility with
+            // existing applications that may have overridden it.
+            mParent.startActivityFromChild(this, intent, requestCode);
+        }
+    }
+}
+</code></pre><hr>
+<pre><code>Activity.java中的startActivityForResult()是这样的：
+
+public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,
+        @Nullable Bundle options) {
+    if (mParent == null) {
+        options = transferSpringboardActivityOptions(options);
+        Instrumentation.ActivityResult ar =
+            mInstrumentation.execStartActivity(
+                this, mMainThread.getApplicationThread(), mToken, this,
+                intent, requestCode, options);
+        if (ar != null) {
+            mMainThread.sendActivityResult(
+                mToken, mEmbeddedID, requestCode, ar.getResultCode(),
+                ar.getResultData());
+        }
+        if (requestCode &gt;= 0) {
+            // If this start is requesting a result, we can avoid making
+            // the activity visible until the result is received.  Setting
+            // this code during onCreate(Bundle savedInstanceState) or onResume() will keep the
+            // activity hidden during this time, to avoid flickering.
+            // This can only be done when a result is requested because
+            // that guarantees we will get information back when the
+            // activity is finished, no matter what happens to it.
+            mStartedActivity = true;
+        }
+
+        cancelInputsAndStartExitTransition(options);
+        // TODO Consider clearing/flushing other event sources and events for child windows.
+    } else {
+        if (options != null) {
+            mParent.startActivityFromChild(this, intent, requestCode, options);
+        } else {
+            // Note we want to go through this method for compatibility with
+            // existing applications that may have overridden it.
+            mParent.startActivityFromChild(this, intent, requestCode);
+        }
+    }
+}
+</code></pre><p><strong>最终都会走ActivityThread.java中的</strong></p>
+<pre><code> public final void sendActivityResult(
+        IBinder token, String id, int requestCode,
+        int resultCode, Intent data) {
+    if (DEBUG_RESULTS) Slog.v(TAG, &quot;sendActivityResult: id=&quot; + id
+            + &quot; req=&quot; + requestCode + &quot; res=&quot; + resultCode + &quot; data=&quot; + data);
+    ArrayList&lt;ResultInfo&gt; list = new ArrayList&lt;ResultInfo&gt;();
+    list.add(new ResultInfo(id, requestCode, resultCode, data));
+    mAppThread.scheduleSendResult(token, list);                                                    ---&gt;
+}
+
+ public final void scheduleSendResult(IBinder token, List&lt;ResultInfo&gt; results) {
+        ResultData res = new ResultData();
+        res.token = token;
+        res.results = results;
+        sendMessage(H.SEND_RESULT, res);                                                        ---&gt;
+    }
+
+ public void handleMessage(Message msg) {
+    ......
+      case SEND_RESULT:
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, &quot;activityDeliverResult&quot;);
+                handleSendResult((ResultData)msg.obj);                                            ---&gt;s
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                break;
+    }
+
+private void handleSendResult(ResultData res) {
+    ......
+     deliverResults(r, res.results);                                                                 ---&gt;
+}
+
+private void deliverResults(ActivityClientRecord r, List&lt;ResultInfo&gt; results) {
+    final int N = results.size();
+    for (int i=0; i&lt;N; i++) {
+        ResultInfo ri = results.get(i);
+        try {
+            if (ri.mData != null) {
+                ri.mData.setExtrasClassLoader(r.activity.getClassLoader());
+                ri.mData.prepareToEnterProcess();
+            }
+            if (DEBUG_RESULTS) Slog.v(TAG,
+                    &quot;Delivering result to activity &quot; + r + &quot; : &quot; + ri);
+            r.activity.dispatchActivityResult(ri.mResultWho,                                    ---&gt;
+                    ri.mRequestCode, ri.mResultCode, ri.mData);
+        } catch (Exception e) {
+            if (!mInstrumentation.onException(r.activity, e)) {
+                throw new RuntimeException(
+                        &quot;Failure delivering result &quot; + ri + &quot; to activity &quot;
+                        + r.intent.getComponent().toShortString()
+                        + &quot;: &quot; + e.toString(), e);
+            }
+        }
+    }
+}
+</code></pre><p>—-&gt;Activity.java——&gt;dispatchActivityResult()方法</p>
+<pre><code>void dispatchActivityResult(String who, int requestCode,
+    int resultCode, Intent data) {
+    if (false) Log.v(
+        TAG, &quot;Dispatching result: who=&quot; + who + &quot;, reqCode=&quot; + requestCode
+        + &quot;, resCode=&quot; + resultCode + &quot;, data=&quot; + data);
+    mFragments.noteStateNotSaved();
+    if (who == null) {
+        onActivityResult(requestCode, resultCode, data);-------------&gt;关键点Activity中onActivityResult回调
+    } else if (who.startsWith(REQUEST_PERMISSIONS_WHO_PREFIX)) {
+        who = who.substring(REQUEST_PERMISSIONS_WHO_PREFIX.length());
+        if (TextUtils.isEmpty(who)) {
+            dispatchRequestPermissionsResult(requestCode, data);
+        } else {
+            Fragment frag = mFragments.findFragmentByWho(who);
+            if (frag != null) {
+                dispatchRequestPermissionsResultToFragment(requestCode, data, frag);
+            }
+        }
+    } else if (who.startsWith(&quot;@android:view:&quot;)) {
+        ArrayList&lt;ViewRootImpl&gt; views = WindowManagerGlobal.getInstance().getRootViews(
+                getActivityToken());
+        for (ViewRootImpl viewRoot : views) {
+            if (viewRoot.getView() != null
+                    &amp;&amp; viewRoot.getView().dispatchActivityResult(
+                            who, requestCode, resultCode, data)) {
+                return;
+            }
+        }
+    } else if (who.startsWith(AUTO_FILL_AUTH_WHO_PREFIX)) {
+        Intent resultData = (resultCode == Activity.RESULT_OK) ? data : null;
+        getAutofillManager().onAuthenticationResult(requestCode, resultData);
+    } else {
+        Fragment frag = mFragments.findFragmentByWho(who);-------------&gt;关键点Fragment中onActivityResult回调
+        if (frag != null) {
+            frag.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+}
+</code></pre><p><strong>所以不管是Fragment还是Activity，调用startActivityForResult()方法都会走：</strong></p>
+<pre><code>if (who == null) {
+        onActivityResult(requestCode, resultCode, data);-------------&gt;关键点Activity中onActivityResult回调
+}
+</code></pre><p><strong>所以正常情况下是都可以拿到回调的，而我这里出现问题，只能说明是我代码哪里出了问题，仔细查询一番才发现，原来，没有处理嵌套Fragment的情况，也就是说回调只到第一级Fragment，就没有继续分发。我们可以实现一个自己的FragmentActiviy，来实现继续分发：</strong></p>
+<pre><code> @Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    android.support.v4.app.FragmentManager supportFragmentManager = getSupportFragmentManager();
+    if (null != supportFragmentManager) {
+        Fragment fragment = supportFragmentManager.findFragmentByTag(FOUND);
+        if (null != fragment) fragment.onActivityResult(requestCode, resultCode, data);
+    }
+}
+</code></pre><p><strong>另外注意：如果重写了activity的onActivityResult()方法， 而没有super.onActivityResult(),那么在fragment中onActivityResult()就不会被调用，因为super.onActivityResult()会去找当前activity的fragment进行回调分发</strong></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-日常踩坑/">标签:日常踩坑</a></li></ul>
+	</div>
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-Glide学习" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/09/13/Glide学习/" class="article-date">
+  	<time datetime="2018-09-13T08:11:36.499Z" itemprop="datePublished">2018-09-13</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>##Glide学习</p>
+<p>####首先Glide用法很简单，举个最简单的例子:</p>
+<pre><code>Glide.with(ctx).load(url).into(imageView);
+</code></pre><p>就这一句很简单的链式调用就完成了我们本该做的复杂的异步请求回调，Glide到底是如何做到的？</p>
+<p><strong>先来看看 with()方法：</strong></p>
+<pre><code>竟然有五个with()重载方法-------------&gt;
+
+public static RequestManager with(Context context) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(context);
+}
+
+public static RequestManager with(Activity activity) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(activity);
+}
+
+public static RequestManager with(FragmentActivity activity) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(activity);
+}
+
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+public static RequestManager with(android.app.Fragment fragment) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(fragment);
+}
+
+  public static RequestManager with(Fragment fragment) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(fragment);
+}
+</code></pre><p><strong>这几个重载最终目的都是为了拿到一个 RequestManager 对象，这个对象是什么？ 有什么作用？</strong></p>
+<pre><code>public class RequestManager implements LifecycleListener {
+    ......
+}
+</code></pre><p>注释是这么说的：</p>
+<p><strong>用于管理和启动Glide请求的类。可以使用活动、片段和连接生命周期事件来智能地停止、启动和重新启动请求。通过实例化一个新对象来检索，或者利用活动和片段生命周期处理中内置的优势，使用静态滑翔。使用片段或活动加载方法。</strong></p>
+<p><strong>而且Glide中运用了一个小技巧，通过创建一个没有视图的 Fragment 来持有创建好的RequestManager对象</strong></p>
+<p>这个了类有800多行代码，一时半会儿看不完，先直接跳到&nbsp;&nbsp; <strong>RequestManager的load()方法</strong>&nbsp;&nbsp;分析一波–&gt;</p>
+<pre><code>public DrawableTypeRequest&lt;String&gt; load(String string) {
+    return (DrawableTypeRequest&lt;String&gt;) fromString().load(string);
+}
+
+public DrawableTypeRequest&lt;String&gt; fromString() {
+    return loadGeneric(String.class);
+}
+
+public DrawableTypeRequest&lt;Uri&gt; load(Uri uri) {
+    return (DrawableTypeRequest&lt;Uri&gt;) fromUri().load(uri);
+}
+
+@Deprecated
+public DrawableTypeRequest&lt;URL&gt; fromUrl() {
+    return loadGeneric(URL.class);
+}
+
+private &lt;T&gt; DrawableTypeRequest&lt;T&gt; loadGeneric(Class&lt;T&gt; modelClass) {
+    ModelLoader&lt;T, InputStream&gt; streamModelLoader = Glide.buildStreamModelLoader(modelClass, context);
+    ModelLoader&lt;T, ParcelFileDescriptor&gt; fileDescriptorModelLoader =
+            Glide.buildFileDescriptorModelLoader(modelClass, context);
+    if (modelClass != null &amp;&amp; streamModelLoader == null &amp;&amp; fileDescriptorModelLoader == null) {
+        throw new IllegalArgumentException(&quot;Unknown type &quot; + modelClass + &quot;. You must provide a Model of a type for&quot;
+                + &quot; which there is a registered ModelLoader, if you are using a custom model, you must first call&quot;
+                + &quot; Glide#register with a ModelLoaderFactory for your custom model class&quot;);
+    }
+
+    return optionsApplier.apply(
+            new DrawableTypeRequest&lt;T&gt;(modelClass, streamModelLoader, fileDescriptorModelLoader, context,
+                    glide, requestTracker, lifecycle, optionsApplier));
+}s
+</code></pre><p>可以看到<strong>load()方法终究会通过一个laodGeneric(Class<t> modelClass)方法生成一个DrawableTypeRequest<t>对象</t></t></strong></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
   
     <article id="post-Semaphore学习" class="article article-type-post" itemscope itemprop="blogPost">
   
