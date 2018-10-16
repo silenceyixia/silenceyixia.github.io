@@ -3,22 +3,23 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Silenceyixia_博客</title>
+  <title>设计模式总结 | Silenceyixia_博客</title>
 
   <!-- keywords -->
   
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="#EventBus 源码学习EventBus使用有一段时间了，用来替换在项目中经常碰到的琐碎复杂的广播(BoardCastReceiver)问题。EventBus我认为最大的优点就是简洁方便，当然也是有缺点的，我认为很明显的一个缺点就是回头查看EventBus发送和订阅毫无头绪，就是说你过段时间回头查看会不清楚Eventbus发送的事件被在哪里被接收。总体来说EventBus使用起来还是很爽的。那">
+<meta name="keywords" content="源码分析">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Silenceyixia_博客">
-<meta property="og:url" content="http://silenceyixia.github.io/2018/10/16/EventBus 源码学习/index.html">
+<meta property="og:title" content="设计模式总结">
+<meta property="og:url" content="http://silenceyixia.github.io/2017/12/21/EventBus 源码学习/index.html">
 <meta property="og:site_name" content="Silenceyixia_博客">
 <meta property="og:description" content="#EventBus 源码学习EventBus使用有一段时间了，用来替换在项目中经常碰到的琐碎复杂的广播(BoardCastReceiver)问题。EventBus我认为最大的优点就是简洁方便，当然也是有缺点的，我认为很明显的一个缺点就是回头查看EventBus发送和订阅毫无头绪，就是说你过段时间回头查看会不清楚Eventbus发送的事件被在哪里被接收。总体来说EventBus使用起来还是很爽的。那">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-10-16T03:56:15.242Z">
+<meta property="og:updated_time" content="2018-10-16T04:03:19.085Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Silenceyixia_博客">
+<meta name="twitter:title" content="设计模式总结">
 <meta name="twitter:description" content="#EventBus 源码学习EventBus使用有一段时间了，用来替换在项目中经常碰到的琐碎复杂的广播(BoardCastReceiver)问题。EventBus我认为最大的优点就是简洁方便，当然也是有缺点的，我认为很明显的一个缺点就是回头查看EventBus发送和订阅毫无头绪，就是说你过段时间回头查看会不清楚Eventbus发送的事件被在哪里被接收。总体来说EventBus使用起来还是很爽的。那">
   
     <link rel="alternative" href="/atom.xml" title="Silenceyixia_博客" type="application/atom+xml">
@@ -113,7 +114,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-日常踩坑/" style="font-size: 10px;">标签:日常踩坑</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：多线程/" style="font-size: 10px;">标签：多线程</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a>
+						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-日常踩坑/" style="font-size: 10px;">标签:日常踩坑</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：多线程/" style="font-size: 10px;">标签：多线程</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a> <a href="/tags/源码分析/" style="font-size: 10px;">源码分析</a>
 					</div>
 				</section>
 				
@@ -172,8 +173,8 @@
       <div class="body-wrap"><article id="post-EventBus 源码学习" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2018/10/16/EventBus 源码学习/" class="article-date">
-  	<time datetime="2018-10-16T03:58:59.261Z" itemprop="datePublished">2018-10-16</time>
+      <a href="/2017/12/21/EventBus 源码学习/" class="article-date">
+  	<time datetime="2017-12-21T08:24:14.000Z" itemprop="datePublished">2017-12-21</time>
 </a>
     </div>
   
@@ -181,6 +182,30 @@
     
       <input type="hidden" class="isFancy" />
     
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      设计模式总结
+      
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/源码分析/">源码分析</a></li></ul>
+	</div>
+
+        
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
     
     <div class="article-entry" itemprop="articleBody">
       
@@ -587,9 +612,18 @@ private void unsubscribeByEventType(Object subscriber, Class&lt;?&gt; eventType)
     
 <nav id="article-nav">
   
+    <a href="/2018/03/05/AsyncTask 源码学习/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          AsyncTask源码学习
+        
+      </div>
+    </a>
   
-    <a href="/2018/09/19/startActivityForResult方法踩坑/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">startActivity()和startActivityForResult()</div>
+  
+    <a href="/2017/12/21/设计模式总结/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">设计模式总结</div>
       <strong class="article-nav-caption">&gt;</strong>
     </a>
   
@@ -599,7 +633,7 @@ private void unsubscribeByEventType(Object subscriber, Class&lt;?&gt; eventType)
 </article>
 
 
-<div class="ds-share share" data-thread-key="EventBus 源码学习" data-title="" data-url="http://silenceyixia.github.io/2018/10/16/EventBus 源码学习/"  data-images="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg" data-content="">
+<div class="ds-share share" data-thread-key="EventBus 源码学习" data-title="设计模式总结" data-url="http://silenceyixia.github.io/2017/12/21/EventBus 源码学习/"  data-images="http://7xkj1z.com1.z0.glb.clouddn.com/head.jpg" data-content="设计模式总结">
     <div class="ds-share-inline">
       <ul  class="ds-share-icons-16">
       	<li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>

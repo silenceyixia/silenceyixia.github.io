@@ -109,7 +109,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-日常踩坑/" style="font-size: 10px;">标签:日常踩坑</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：多线程/" style="font-size: 10px;">标签：多线程</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a>
+						<a href="/tags/android-mediaplayer-视频-音频/" style="font-size: 10px;">android mediaplayer 视频 音频</a> <a href="/tags/java-设计模式/" style="font-size: 10px;">java 设计模式</a> <a href="/tags/标签-日常踩坑/" style="font-size: 10px;">标签:日常踩坑</a> <a href="/tags/标签-源码分析/" style="font-size: 20px;">标签:源码分析</a> <a href="/tags/标签：多线程/" style="font-size: 10px;">标签：多线程</a> <a href="/tags/标签：高德地图/" style="font-size: 10px;">标签：高德地图</a> <a href="/tags/源码分析/" style="font-size: 10px;">源码分析</a>
 					</div>
 				</section>
 				
@@ -166,440 +166,6 @@
 	</div>
 </nav>
       <div class="body-wrap">
-  
-    <article id="post-EventBus 源码学习" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2018/10/16/EventBus 源码学习/" class="article-date">
-  	<time datetime="2018-10-16T03:58:59.261Z" itemprop="datePublished">2018-10-16</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="EventBus-源码学习"><a href="#EventBus-源码学习" class="headerlink" title="#EventBus 源码学习"></a>#EventBus 源码学习</h2><p>EventBus使用有一段时间了，用来替换在项目中经常碰到的琐碎复杂的广播(BoardCastReceiver)问题。EventBus我认为最大的优点就是简洁方便，当然也是有缺点的，我认为很明显的一个缺点就是回头查看EventBus发送和订阅毫无头绪，就是说你过段时间回头查看会不清楚Eventbus发送的事件被在哪里被接收。总体来说EventBus使用起来还是很爽的。那么EventBus是如何实现的。我抽出了一些时间专门研究了下EventBus的源码。</p>
-<hr>
-<p>###EventBus使用：</p>
-<p>EventBus的使用无非就是：</p>
-<pre><code>&lt;1&gt; 在 A类中 EventBus----&gt;register(subscriber)      注册EventBus监听
-&lt;2&gt; 在 B类中 EventBus----&gt;post(obj)      发送事件
-&lt;3&gt;    在 A类中 @Subcribe  注解的方法中进行接收处理事件
-&lt;4&gt; 在 A类中 EventBus----&gt;unResgister(subscriber)    注销EventBus监听
-</code></pre><hr>
-<p>###EventBus源码分析：<br><strong>首先来了解一下EventBus–&gt;register(subscriber) 注册：</strong></p>
-<pre><code>**EventBus.java**
-/**
- * Registers the given subscriber to receive events. Subscribers must call {@link #unregister(Object)} once 
- * they are no longer interested in receiving events.
- * &lt;p/&gt;
- * Subscribers have event handling methods that must be annotated by {@link Subscribe}.
- * The {@link Subscribe} annotation also allows configuration like {@link
- * ThreadMode} and priority.
- */
-public void register(Object subscriber) {
-    Class&lt;?&gt; subscriberClass = subscriber.getClass();
-    List&lt;SubscriberMethod&gt; subscriberMethods = subscriberMethodFinder.findSubscriberMethods(subscriberClass);
-    synchronized (this) {
-        for (SubscriberMethod subscriberMethod : subscriberMethods) {
-            subscribe(subscriber, subscriberMethod);
-        }
-    }
-}
-</code></pre><p> <strong><code>subscriberMethodFinder.findSubscriberMethods()</code> 这里是用来查找指定类中所有订阅EventBus的方法，有则返回，没有则先添加后返回，然后在线程安全的情况下开始进行订阅<code>subscribe(subscriber, subscriberMethod)</code></strong></p>
-<pre><code>**SubscriberMethodFinder.java**
-//----
-List&lt;SubscriberMethod&gt; findSubscriberMethods(Class&lt;?&gt; subscriberClass) {
-    List&lt;SubscriberMethod&gt; subscriberMethods = METHOD_CACHE.get(subscriberClass);
-    if (subscriberMethods != null) {
-        return subscriberMethods;
-    }
-
-    if (ignoreGeneratedIndex) {                                                &lt;1&gt;ignoreGeneratedIndex默认是true
-        subscriberMethods = findUsingReflection(subscriberClass);
-    } else {
-        subscriberMethods = findUsingInfo(subscriberClass);
-    }
-    if (subscriberMethods.isEmpty()) {
-        throw new EventBusException(&quot;Subscriber &quot; + subscriberClass
-                + &quot; and its super classes have no public methods with the @Subscribe annotation&quot;);
-    } else {
-        METHOD_CACHE.put(subscriberClass, subscriberMethods);
-        return subscriberMethods;
-    }
-}
-</code></pre><p><1>ignoreGeneratedIndex默认是true,所以会执行<strong>findUsingReflection(subscriberClass)</strong>;</1></p>
-<pre><code> private List&lt;SubscriberMethod&gt; findUsingReflection(Class&lt;?&gt; subscriberClass) {
-    FindState findState = prepareFindState();
-    findState.initForSubscriber(subscriberClass);
-    while (findState.clazz != null) {
-        findUsingReflectionInSingleClass(findState);
-        findState.moveToSuperclass();
-    }
-    return getMethodsAndRelease(findState);
-}
-
-static class FindState {
-    final List&lt;SubscriberMethod&gt; subscriberMethods = new ArrayList&lt;&gt;();
-    final Map&lt;Class, Object&gt; anyMethodByEventType = new HashMap&lt;&gt;();
-    final Map&lt;String, Class&gt; subscriberClassByMethodKey = new HashMap&lt;&gt;();
-    final StringBuilder methodKeyBuilder = new StringBuilder(128);
-
-    Class&lt;?&gt; subscriberClass;
-    Class&lt;?&gt; clazz;
-    boolean skipSuperClasses;
-    SubscriberInfo subscriberInfo;
-
-    ......
-
-    }
-</code></pre><p><strong>FindState暂时没弄懂是干啥的，目前只知道FindState中存储了许多关键类和状态以及订阅EventBus的方法和注册EventBus监听的类等数据，看下面的这个关键方法，通过反射来获取指定类中订阅EventBus的方法</strong></p>
-<pre><code>private void findUsingReflectionInSingleClass(FindState findState) {
-    Method[] methods;
-    try {
-        // This is faster than getMethods, especially when subscribers are fat classes like Activities
-        methods = findState.clazz.getDeclaredMethods();
-    } catch (Throwable th) {
-        // Workaround for java.lang.NoClassDefFoundError, see https://github.com/greenrobot/EventBus/issues/149
-        methods = findState.clazz.getMethods();
-        findState.skipSuperClasses = true;
-    }
-    for (Method method : methods) {
-        int modifiers = method.getModifiers();
-        if ((modifiers &amp; Modifier.PUBLIC) != 0 &amp;&amp; (modifiers &amp; MODIFIERS_IGNORE) == 0) {
-            Class&lt;?&gt;[] parameterTypes = method.getParameterTypes();
-            if (parameterTypes.length == 1) {
-                Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
-                if (subscribeAnnotation != null) {
-                    Class&lt;?&gt; eventType = parameterTypes[0];
-                    if (findState.checkAdd(method, eventType)) {
-                        ThreadMode threadMode = subscribeAnnotation.threadMode();
-                        findState.subscriberMethods.add(new SubscriberMethod(method, eventType, threadMode,
-                                subscribeAnnotation.priority(), subscribeAnnotation.sticky()));
-                    }
-                }
-            } else if (strictMethodVerification &amp;&amp; method.isAnnotationPresent(Subscribe.class)) {
-                String methodName = method.getDeclaringClass().getName() + &quot;.&quot; + method.getName();
-                throw new EventBusException(&quot;@Subscribe method &quot; + methodName +
-                        &quot;must have exactly 1 parameter but has &quot; + parameterTypes.length);
-            }
-        } else if (strictMethodVerification &amp;&amp; method.isAnnotationPresent(Subscribe.class)) {
-            String methodName = method.getDeclaringClass().getName() + &quot;.&quot; + method.getName();
-            throw new EventBusException(methodName +
-                    &quot; is a illegal @Subscribe method: must be public, non-static, and non-abstract&quot;);
-        }
-    }
-}
-</code></pre><p><strong>可以看出，<code>methods = findState.clazz.getDeclaredMethods();</code> 首先通过反射获取注册EventBus的类中的所有的方法，然后根据<br><code>if (parameterTypes.length == 1)</code> 判断，可以知道EventBus的事件接收方法必然只有一个参数，否则会抛异常，接着看到了<br><code>Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);</code>，意味着EventBus事件接收者的明显特征就是添加了@Subscribe注解且只有一个参数的方法</strong></p>
-<pre><code>boolean checkAdd(Method method, Class&lt;?&gt; eventType) {
-        // 2 level check: 1st level with event type only (fast), 2nd level with complete signature when required.
-        // Usually a subscriber doesn&apos;t have methods listening to the same event type.
-        Object existing = anyMethodByEventType.put(eventType, method);
-        if (existing == null) {
-            return true;
-        } else {
-            if (existing instanceof Method) {
-                if (!checkAddWithMethodSignature((Method) existing, eventType)) {
-                    // Paranoia check
-                    throw new IllegalStateException();
-                }
-                // Put any non-Method object to &quot;consume&quot; the existing Method
-                anyMethodByEventType.put(eventType, this);
-            }
-            return checkAddWithMethodSignature(method, eventType);
-        }
-    }
-</code></pre><p><strong>进一步<code>findState.checkAdd(method, eventType)</code>，检查改事件订阅方法以及参数列表中第一个也是唯一一个参数类型 是否满足条件且没有被缓存起来，如果没有缓存起来，则加入到缓存集合(也就是EventBus事件订阅方法集合)，如果该方法在声明类的子类中有重载方法，则撤销添加</strong></p>
-<pre><code>    for (SubscriberMethod subscriberMethod : subscriberMethods) {
-     subscribe(subscriber, subscriberMethod);
- }
-
- private void subscribe(Object subscriber, SubscriberMethod subscriberMethod) {
-    Class&lt;?&gt; eventType = subscriberMethod.eventType;
-    Subscription newSubscription = new Subscription(subscriber, subscriberMethod);
-    CopyOnWriteArrayList&lt;Subscription&gt; subscriptions = subscriptionsByEventType.get(eventType);
-    if (subscriptions == null) {
-        subscriptions = new CopyOnWriteArrayList&lt;&gt;();
-        subscriptionsByEventType.put(eventType, subscriptions);
-    } else {
-        if (subscriptions.contains(newSubscription)) {
-            throw new EventBusException(&quot;Subscriber &quot; + subscriber.getClass() + &quot; already registered to event &quot;
-                    + eventType);
-        }
-    }
-
-    int size = subscriptions.size();
-    for (int i = 0; i &lt;= size; i++) {
-        if (i == size || subscriberMethod.priority &gt; subscriptions.get(i).subscriberMethod.priority) {
-            subscriptions.add(i, newSubscription);
-            break;
-        }
-    }
-
-    List&lt;Class&lt;?&gt;&gt; subscribedEvents = typesBySubscriber.get(subscriber);
-    if (subscribedEvents == null) {
-        subscribedEvents = new ArrayList&lt;&gt;();
-        typesBySubscriber.put(subscriber, subscribedEvents);
-    }
-    subscribedEvents.add(eventType);
-
-    if (subscriberMethod.sticky) {
-        if (eventInheritance) {
-            // Existing sticky events of all subclasses of eventType have to be considered.
-            // Note: Iterating over all events may be inefficient with lots of sticky events,
-            // thus data structure should be changed to allow a more efficient lookup
-            // (e.g. an additional map storing sub classes of super classes: Class -&gt; List&lt;Class&gt;).
-            Set&lt;Map.Entry&lt;Class&lt;?&gt;, Object&gt;&gt; entries = stickyEvents.entrySet();
-            for (Map.Entry&lt;Class&lt;?&gt;, Object&gt; entry : entries) {
-                Class&lt;?&gt; candidateEventType = entry.getKey();
-                if (eventType.isAssignableFrom(candidateEventType)) {
-                    Object stickyEvent = entry.getValue();
-                    checkPostStickyEventToSubscription(newSubscription, stickyEvent);
-                }
-            }
-        } else {
-            Object stickyEvent = stickyEvents.get(eventType);
-            checkPostStickyEventToSubscription(newSubscription, stickyEvent);
-        }
-    }
-}
-</code></pre><p><strong>获取订阅者中的所有订阅方法，并依次进行订阅（将订阅方法与订阅者以及方法名，参数类型一致绑定），同时如果发现事件订阅方法是粘性的，则将未完成的粘性事件进行发送</strong></p>
-<hr>
-<p><strong>到目前为止，EventBus已注册完毕，接下来就是等待EventBus发送事件</strong></p>
-<pre><code> /** Posts the given event to the event bus. */
-public void post(Object event) {
-    PostingThreadState postingState = currentPostingThreadState.get();
-    List&lt;Object&gt; eventQueue = postingState.eventQueue;
-    eventQueue.add(event);
-
-    if (!postingState.isPosting) {
-        postingState.isMainThread = Looper.getMainLooper() == Looper.myLooper();
-        postingState.isPosting = true;
-        if (postingState.canceled) {
-            throw new EventBusException(&quot;Internal error. Abort state was not reset&quot;);
-        }
-        try {
-            while (!eventQueue.isEmpty()) {
-                postSingleEvent(eventQueue.remove(0), postingState);
-            }
-        } finally {
-            postingState.isPosting = false;
-            postingState.isMainThread = false;
-        }
-    }
-}
-</code></pre><p><strong><code>PostingThreadState postingState = currentPostingThreadState.get();</code>可以看到一个熟悉的对象    ThreadLocal</strong></p>
-<pre><code>private final ThreadLocal&lt;PostingThreadState&gt; currentPostingThreadState = new ThreadLocal&lt;PostingThreadState&gt;() {
-    @Override
-    protected PostingThreadState initialValue() {
-        return new PostingThreadState();
-    }
-};
-</code></pre><p><strong>currentPostingThreadState是一个ThreadLocal对象，这个对象我觉得实现的非常牛逼，它是和线程绑定，相当于ThreadLocal中的数据在线程中有一份副本，在所属线程中只能获取该线程中的ThreadLocal数据副本，不同的线程有不同的副本数据，优点是在当前线程中，何一个点都可以访问到ThreadLocal的值，而且不会产生内存泄漏，因为ThreadLocalMap在选择关键的时候，并不是直接选择ThreadLocal的实例，而是ThreadLocal的实例的弱引用,缺点是ThreadLocal中的值会常驻堆内存</strong></p>
-<pre><code>static class ThreadLocalMap {
-
-/**
-* The entries in this hash map extend WeakReference, using
-* its main ref field as the key (which is always a
-* ThreadLocal object).  Note that null keys (i.e. entry.get()
-* == null) mean that the key is no longer referenced, so the
-* entry can be expunged from table.  Such entries are referred to
-* as &quot;stale entries&quot; in the code that follows.
-*/
-static class Entry extends WeakReference&lt;ThreadLocal&lt;?&gt;&gt; {
-    /** The value associated with this ThreadLocal. */
-    Object value;
-
-    Entry(ThreadLocal&lt;?&gt; k, Object v) {
-        super(k);
-        value = v;
-    }
-}
-}
-</code></pre><p><strong>所以ThreadLocal是个人认为非常令人强大方便的存在。接着上面的EventBus.post()方法分析，首先拿到当前线程中的PostingThreadState对象，</strong></p>
-<pre><code> final static class PostingThreadState {
-    final List&lt;Object&gt; eventQueue = new ArrayList&lt;Object&gt;();
-    boolean isPosting;
-    boolean isMainThread;
-    Subscription subscription;
-    Object event;
-    boolean canceled;
-}
-</code></pre><p><strong>PostingThreadState对象中存储着当前线程中的几个关键状态，以及事件队列，<code>eventQueue.add(event)</code>，先将要发送的事件加入到队列中，<code>postSingleEvent(eventQueue.remove(0), postingState);</code>依次发送事件并从事件队列中移除</strong></p>
-<pre><code>private void postSingleEvent(Object event, PostingThreadState postingState) throws Error {
-    Class&lt;?&gt; eventClass = event.getClass();
-    boolean subscriptionFound = false;
-    if (eventInheritance) {
-        List&lt;Class&lt;?&gt;&gt; eventTypes = lookupAllEventTypes(eventClass);
-        int countTypes = eventTypes.size();
-        for (int h = 0; h &lt; countTypes; h++) {
-            Class&lt;?&gt; clazz = eventTypes.get(h);
-            subscriptionFound |= postSingleEventForEventType(event, postingState, clazz);
-        }
-    } else {
-        subscriptionFound = postSingleEventForEventType(event, postingState, eventClass);
-    }
-    if (!subscriptionFound) {
-        if (logNoSubscriberMessages) {
-            Log.d(TAG, &quot;No subscribers registered for event &quot; + eventClass);
-        }
-        if (sendNoSubscriberEvent &amp;&amp; eventClass != NoSubscriberEvent.class &amp;&amp;
-                eventClass != SubscriberExceptionEvent.class) {
-            post(new NoSubscriberEvent(this, event));
-        }
-    }
-}
-</code></pre><p><strong>看看<code>lookupAllEventTypes(eventClass)</code>是如何查找该事件的所有事件类型</strong></p>
-<pre><code>    private static List&lt;Class&lt;?&gt;&gt; lookupAllEventTypes(Class&lt;?&gt; eventClass) {
-    synchronized (eventTypesCache) {
-        List&lt;Class&lt;?&gt;&gt; eventTypes = eventTypesCache.get(eventClass);
-        if (eventTypes == null) {
-            eventTypes = new ArrayList&lt;&gt;();
-            Class&lt;?&gt; clazz = eventClass;
-            while (clazz != null) {
-                eventTypes.add(clazz);
-                addInterfaces(eventTypes, clazz.getInterfaces());
-                clazz = clazz.getSuperclass();
-            }
-            eventTypesCache.put(eventClass, eventTypes);
-        }
-        return eventTypes;
-    }
-}
-</code></pre><p><strong>可以看出 查找的是当前事件的类类型以及父类(包含接口)的类类型的集合，然后遍历当前事件类型集合，依次进行事件发送</strong></p>
-<pre><code>private boolean postSingleEventForEventType(Object event, PostingThreadState postingState, Class&lt;?&gt; eventClass) {
-    CopyOnWriteArrayList&lt;Subscription&gt; subscriptions;
-    synchronized (this) {
-        subscriptions = subscriptionsByEventType.get(eventClass);
-    }
-    if (subscriptions != null &amp;&amp; !subscriptions.isEmpty()) {
-        for (Subscription subscription : subscriptions) {
-            postingState.event = event;                                                        1
-            postingState.subscription = subscription;                                        2
-            boolean aborted = false;
-            try {
-                postToSubscription(subscription, event, postingState.isMainThread);
-                aborted = postingState.canceled;
-            } finally {
-                postingState.event = null;
-                postingState.subscription = null;
-                postingState.canceled = false;
-            }
-            if (aborted) {
-                break;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-</code></pre><p><strong><code>subscriptions = subscriptionsByEventType.get(eventClass);</code>找到当前事件类型的所有订阅者信息，1和2 两行是将待发送的事件以及事件的订阅者备份到当前线程中，最后通过<code>postToSubscription(subscription, event, postingState.isMainThread);</code>开始实施发送事件</strong>    </p>
-<pre><code>private void postToSubscription(Subscription subscription, Object event, boolean isMainThread) {
-    switch (subscription.subscriberMethod.threadMode) {
-        case POSTING:
-            invokeSubscriber(subscription, event);
-            break;
-        case MAIN:
-            if (isMainThread) {
-                invokeSubscriber(subscription, event);
-            } else {
-                mainThreadPoster.enqueue(subscription, event);
-            }
-            break;
-        case BACKGROUND:
-            if (isMainThread) {
-                backgroundPoster.enqueue(subscription, event);
-            } else {
-                invokeSubscriber(subscription, event);
-            }
-            break;
-        case ASYNC:
-            asyncPoster.enqueue(subscription, event);
-            break;
-        default:
-            throw new IllegalStateException(&quot;Unknown thread mode: &quot; + subscription.subscriberMethod.threadMode);
-    }
-}
-
-
-void invokeSubscriber(Subscription subscription, Object event) {
-    try {
-        subscription.subscriberMethod.method.invoke(subscription.subscriber, event);
-    } catch (InvocationTargetException e) {
-        handleSubscriberException(subscription, event, e.getCause());
-    } catch (IllegalAccessException e) {
-        throw new IllegalStateException(&quot;Unexpected exception&quot;, e);
-    }
-}
-</code></pre><p><strong>到此为止，才算真正完成了事件的发送（只能通过反射调用订阅方法进行事件发送）</strong></p>
-<pre><code>finally {
-               postingState.event = null;
-               postingState.subscription = null;
-               postingState.canceled = false;
-          }
-</code></pre><p><strong>发送完一个事件之后，会清除线程中的备份数据（刚刚发送的事件以及事件的订阅者），并重置一些状态，等待进行下一个事件的发送</strong></p>
-<hr>
-<p><strong>最后来看一下取消订阅unregister(subscriber)方法,这个就简单了</strong></p>
-<pre><code>  /** Unregisters the given subscriber from all event classes. */
-public synchronized void unregister(Object subscriber) {
-    List&lt;Class&lt;?&gt;&gt; subscribedTypes = typesBySubscriber.get(subscriber);
-    if (subscribedTypes != null) {
-        for (Class&lt;?&gt; eventType : subscribedTypes) {
-            unsubscribeByEventType(subscriber, eventType);
-        }
-        typesBySubscriber.remove(subscriber);
-    } else {
-        Log.w(TAG, &quot;Subscriber to unregister was not registered before: &quot; + subscriber.getClass());
-    }
-}
-
-  /** Only updates subscriptionsByEventType, not typesBySubscriber! Caller must update typesBySubscriber. */
-private void unsubscribeByEventType(Object subscriber, Class&lt;?&gt; eventType) {
-    List&lt;Subscription&gt; subscriptions = subscriptionsByEventType.get(eventType);
-    if (subscriptions != null) {
-        int size = subscriptions.size();
-        for (int i = 0; i &lt; size; i++) {
-            Subscription subscription = subscriptions.get(i);
-            if (subscription.subscriber == subscriber) {
-                subscription.active = false;
-                subscriptions.remove(i);
-                i--;
-                size--;
-            }
-        }
-    }
-}
-</code></pre><p><strong>就是将要取消的事件订阅者的相关信息从存储列表中进行删除</strong></p>
-<hr>
-<p><strong>至此，便简单的完成了对EventBus框架的学习，很多细节还没有研究透，回过头多研究研究，肯定会有不小的收获的</strong></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-      
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
   
     <article id="post-startActivityForResult方法踩坑" class="article article-type-post" itemscope itemprop="blogPost">
   
@@ -1628,6 +1194,458 @@ private void finish(Result result) {
       
 	<div class="article-tag tagcloud">
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/标签-源码分析/">标签:源码分析</a></li></ul>
+	</div>
+
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+      
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+  
+    <article id="post-EventBus 源码学习" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/12/21/EventBus 源码学习/" class="article-date">
+  	<time datetime="2017-12-21T08:24:14.000Z" itemprop="datePublished">2017-12-21</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/12/21/EventBus 源码学习/">
+        设计模式总结
+        
+      </a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="EventBus-源码学习"><a href="#EventBus-源码学习" class="headerlink" title="#EventBus 源码学习"></a>#EventBus 源码学习</h2><p>EventBus使用有一段时间了，用来替换在项目中经常碰到的琐碎复杂的广播(BoardCastReceiver)问题。EventBus我认为最大的优点就是简洁方便，当然也是有缺点的，我认为很明显的一个缺点就是回头查看EventBus发送和订阅毫无头绪，就是说你过段时间回头查看会不清楚Eventbus发送的事件被在哪里被接收。总体来说EventBus使用起来还是很爽的。那么EventBus是如何实现的。我抽出了一些时间专门研究了下EventBus的源码。</p>
+<hr>
+<p>###EventBus使用：</p>
+<p>EventBus的使用无非就是：</p>
+<pre><code>&lt;1&gt; 在 A类中 EventBus----&gt;register(subscriber)      注册EventBus监听
+&lt;2&gt; 在 B类中 EventBus----&gt;post(obj)      发送事件
+&lt;3&gt;    在 A类中 @Subcribe  注解的方法中进行接收处理事件
+&lt;4&gt; 在 A类中 EventBus----&gt;unResgister(subscriber)    注销EventBus监听
+</code></pre><hr>
+<p>###EventBus源码分析：<br><strong>首先来了解一下EventBus–&gt;register(subscriber) 注册：</strong></p>
+<pre><code>**EventBus.java**
+/**
+ * Registers the given subscriber to receive events. Subscribers must call {@link #unregister(Object)} once 
+ * they are no longer interested in receiving events.
+ * &lt;p/&gt;
+ * Subscribers have event handling methods that must be annotated by {@link Subscribe}.
+ * The {@link Subscribe} annotation also allows configuration like {@link
+ * ThreadMode} and priority.
+ */
+public void register(Object subscriber) {
+    Class&lt;?&gt; subscriberClass = subscriber.getClass();
+    List&lt;SubscriberMethod&gt; subscriberMethods = subscriberMethodFinder.findSubscriberMethods(subscriberClass);
+    synchronized (this) {
+        for (SubscriberMethod subscriberMethod : subscriberMethods) {
+            subscribe(subscriber, subscriberMethod);
+        }
+    }
+}
+</code></pre><p> <strong><code>subscriberMethodFinder.findSubscriberMethods()</code> 这里是用来查找指定类中所有订阅EventBus的方法，有则返回，没有则先添加后返回，然后在线程安全的情况下开始进行订阅<code>subscribe(subscriber, subscriberMethod)</code></strong></p>
+<pre><code>**SubscriberMethodFinder.java**
+//----
+List&lt;SubscriberMethod&gt; findSubscriberMethods(Class&lt;?&gt; subscriberClass) {
+    List&lt;SubscriberMethod&gt; subscriberMethods = METHOD_CACHE.get(subscriberClass);
+    if (subscriberMethods != null) {
+        return subscriberMethods;
+    }
+
+    if (ignoreGeneratedIndex) {                                                &lt;1&gt;ignoreGeneratedIndex默认是true
+        subscriberMethods = findUsingReflection(subscriberClass);
+    } else {
+        subscriberMethods = findUsingInfo(subscriberClass);
+    }
+    if (subscriberMethods.isEmpty()) {
+        throw new EventBusException(&quot;Subscriber &quot; + subscriberClass
+                + &quot; and its super classes have no public methods with the @Subscribe annotation&quot;);
+    } else {
+        METHOD_CACHE.put(subscriberClass, subscriberMethods);
+        return subscriberMethods;
+    }
+}
+</code></pre><p><1>ignoreGeneratedIndex默认是true,所以会执行<strong>findUsingReflection(subscriberClass)</strong>;</1></p>
+<pre><code> private List&lt;SubscriberMethod&gt; findUsingReflection(Class&lt;?&gt; subscriberClass) {
+    FindState findState = prepareFindState();
+    findState.initForSubscriber(subscriberClass);
+    while (findState.clazz != null) {
+        findUsingReflectionInSingleClass(findState);
+        findState.moveToSuperclass();
+    }
+    return getMethodsAndRelease(findState);
+}
+
+static class FindState {
+    final List&lt;SubscriberMethod&gt; subscriberMethods = new ArrayList&lt;&gt;();
+    final Map&lt;Class, Object&gt; anyMethodByEventType = new HashMap&lt;&gt;();
+    final Map&lt;String, Class&gt; subscriberClassByMethodKey = new HashMap&lt;&gt;();
+    final StringBuilder methodKeyBuilder = new StringBuilder(128);
+
+    Class&lt;?&gt; subscriberClass;
+    Class&lt;?&gt; clazz;
+    boolean skipSuperClasses;
+    SubscriberInfo subscriberInfo;
+
+    ......
+
+    }
+</code></pre><p><strong>FindState暂时没弄懂是干啥的，目前只知道FindState中存储了许多关键类和状态以及订阅EventBus的方法和注册EventBus监听的类等数据，看下面的这个关键方法，通过反射来获取指定类中订阅EventBus的方法</strong></p>
+<pre><code>private void findUsingReflectionInSingleClass(FindState findState) {
+    Method[] methods;
+    try {
+        // This is faster than getMethods, especially when subscribers are fat classes like Activities
+        methods = findState.clazz.getDeclaredMethods();
+    } catch (Throwable th) {
+        // Workaround for java.lang.NoClassDefFoundError, see https://github.com/greenrobot/EventBus/issues/149
+        methods = findState.clazz.getMethods();
+        findState.skipSuperClasses = true;
+    }
+    for (Method method : methods) {
+        int modifiers = method.getModifiers();
+        if ((modifiers &amp; Modifier.PUBLIC) != 0 &amp;&amp; (modifiers &amp; MODIFIERS_IGNORE) == 0) {
+            Class&lt;?&gt;[] parameterTypes = method.getParameterTypes();
+            if (parameterTypes.length == 1) {
+                Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
+                if (subscribeAnnotation != null) {
+                    Class&lt;?&gt; eventType = parameterTypes[0];
+                    if (findState.checkAdd(method, eventType)) {
+                        ThreadMode threadMode = subscribeAnnotation.threadMode();
+                        findState.subscriberMethods.add(new SubscriberMethod(method, eventType, threadMode,
+                                subscribeAnnotation.priority(), subscribeAnnotation.sticky()));
+                    }
+                }
+            } else if (strictMethodVerification &amp;&amp; method.isAnnotationPresent(Subscribe.class)) {
+                String methodName = method.getDeclaringClass().getName() + &quot;.&quot; + method.getName();
+                throw new EventBusException(&quot;@Subscribe method &quot; + methodName +
+                        &quot;must have exactly 1 parameter but has &quot; + parameterTypes.length);
+            }
+        } else if (strictMethodVerification &amp;&amp; method.isAnnotationPresent(Subscribe.class)) {
+            String methodName = method.getDeclaringClass().getName() + &quot;.&quot; + method.getName();
+            throw new EventBusException(methodName +
+                    &quot; is a illegal @Subscribe method: must be public, non-static, and non-abstract&quot;);
+        }
+    }
+}
+</code></pre><p><strong>可以看出，<code>methods = findState.clazz.getDeclaredMethods();</code> 首先通过反射获取注册EventBus的类中的所有的方法，然后根据<br><code>if (parameterTypes.length == 1)</code> 判断，可以知道EventBus的事件接收方法必然只有一个参数，否则会抛异常，接着看到了<br><code>Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);</code>，意味着EventBus事件接收者的明显特征就是添加了@Subscribe注解且只有一个参数的方法</strong></p>
+<pre><code>boolean checkAdd(Method method, Class&lt;?&gt; eventType) {
+        // 2 level check: 1st level with event type only (fast), 2nd level with complete signature when required.
+        // Usually a subscriber doesn&apos;t have methods listening to the same event type.
+        Object existing = anyMethodByEventType.put(eventType, method);
+        if (existing == null) {
+            return true;
+        } else {
+            if (existing instanceof Method) {
+                if (!checkAddWithMethodSignature((Method) existing, eventType)) {
+                    // Paranoia check
+                    throw new IllegalStateException();
+                }
+                // Put any non-Method object to &quot;consume&quot; the existing Method
+                anyMethodByEventType.put(eventType, this);
+            }
+            return checkAddWithMethodSignature(method, eventType);
+        }
+    }
+</code></pre><p><strong>进一步<code>findState.checkAdd(method, eventType)</code>，检查改事件订阅方法以及参数列表中第一个也是唯一一个参数类型 是否满足条件且没有被缓存起来，如果没有缓存起来，则加入到缓存集合(也就是EventBus事件订阅方法集合)，如果该方法在声明类的子类中有重载方法，则撤销添加</strong></p>
+<pre><code>    for (SubscriberMethod subscriberMethod : subscriberMethods) {
+     subscribe(subscriber, subscriberMethod);
+ }
+
+ private void subscribe(Object subscriber, SubscriberMethod subscriberMethod) {
+    Class&lt;?&gt; eventType = subscriberMethod.eventType;
+    Subscription newSubscription = new Subscription(subscriber, subscriberMethod);
+    CopyOnWriteArrayList&lt;Subscription&gt; subscriptions = subscriptionsByEventType.get(eventType);
+    if (subscriptions == null) {
+        subscriptions = new CopyOnWriteArrayList&lt;&gt;();
+        subscriptionsByEventType.put(eventType, subscriptions);
+    } else {
+        if (subscriptions.contains(newSubscription)) {
+            throw new EventBusException(&quot;Subscriber &quot; + subscriber.getClass() + &quot; already registered to event &quot;
+                    + eventType);
+        }
+    }
+
+    int size = subscriptions.size();
+    for (int i = 0; i &lt;= size; i++) {
+        if (i == size || subscriberMethod.priority &gt; subscriptions.get(i).subscriberMethod.priority) {
+            subscriptions.add(i, newSubscription);
+            break;
+        }
+    }
+
+    List&lt;Class&lt;?&gt;&gt; subscribedEvents = typesBySubscriber.get(subscriber);
+    if (subscribedEvents == null) {
+        subscribedEvents = new ArrayList&lt;&gt;();
+        typesBySubscriber.put(subscriber, subscribedEvents);
+    }
+    subscribedEvents.add(eventType);
+
+    if (subscriberMethod.sticky) {
+        if (eventInheritance) {
+            // Existing sticky events of all subclasses of eventType have to be considered.
+            // Note: Iterating over all events may be inefficient with lots of sticky events,
+            // thus data structure should be changed to allow a more efficient lookup
+            // (e.g. an additional map storing sub classes of super classes: Class -&gt; List&lt;Class&gt;).
+            Set&lt;Map.Entry&lt;Class&lt;?&gt;, Object&gt;&gt; entries = stickyEvents.entrySet();
+            for (Map.Entry&lt;Class&lt;?&gt;, Object&gt; entry : entries) {
+                Class&lt;?&gt; candidateEventType = entry.getKey();
+                if (eventType.isAssignableFrom(candidateEventType)) {
+                    Object stickyEvent = entry.getValue();
+                    checkPostStickyEventToSubscription(newSubscription, stickyEvent);
+                }
+            }
+        } else {
+            Object stickyEvent = stickyEvents.get(eventType);
+            checkPostStickyEventToSubscription(newSubscription, stickyEvent);
+        }
+    }
+}
+</code></pre><p><strong>获取订阅者中的所有订阅方法，并依次进行订阅（将订阅方法与订阅者以及方法名，参数类型一致绑定），同时如果发现事件订阅方法是粘性的，则将未完成的粘性事件进行发送</strong></p>
+<hr>
+<p><strong>到目前为止，EventBus已注册完毕，接下来就是等待EventBus发送事件</strong></p>
+<pre><code> /** Posts the given event to the event bus. */
+public void post(Object event) {
+    PostingThreadState postingState = currentPostingThreadState.get();
+    List&lt;Object&gt; eventQueue = postingState.eventQueue;
+    eventQueue.add(event);
+
+    if (!postingState.isPosting) {
+        postingState.isMainThread = Looper.getMainLooper() == Looper.myLooper();
+        postingState.isPosting = true;
+        if (postingState.canceled) {
+            throw new EventBusException(&quot;Internal error. Abort state was not reset&quot;);
+        }
+        try {
+            while (!eventQueue.isEmpty()) {
+                postSingleEvent(eventQueue.remove(0), postingState);
+            }
+        } finally {
+            postingState.isPosting = false;
+            postingState.isMainThread = false;
+        }
+    }
+}
+</code></pre><p><strong><code>PostingThreadState postingState = currentPostingThreadState.get();</code>可以看到一个熟悉的对象    ThreadLocal</strong></p>
+<pre><code>private final ThreadLocal&lt;PostingThreadState&gt; currentPostingThreadState = new ThreadLocal&lt;PostingThreadState&gt;() {
+    @Override
+    protected PostingThreadState initialValue() {
+        return new PostingThreadState();
+    }
+};
+</code></pre><p><strong>currentPostingThreadState是一个ThreadLocal对象，这个对象我觉得实现的非常牛逼，它是和线程绑定，相当于ThreadLocal中的数据在线程中有一份副本，在所属线程中只能获取该线程中的ThreadLocal数据副本，不同的线程有不同的副本数据，优点是在当前线程中，何一个点都可以访问到ThreadLocal的值，而且不会产生内存泄漏，因为ThreadLocalMap在选择关键的时候，并不是直接选择ThreadLocal的实例，而是ThreadLocal的实例的弱引用,缺点是ThreadLocal中的值会常驻堆内存</strong></p>
+<pre><code>static class ThreadLocalMap {
+
+/**
+* The entries in this hash map extend WeakReference, using
+* its main ref field as the key (which is always a
+* ThreadLocal object).  Note that null keys (i.e. entry.get()
+* == null) mean that the key is no longer referenced, so the
+* entry can be expunged from table.  Such entries are referred to
+* as &quot;stale entries&quot; in the code that follows.
+*/
+static class Entry extends WeakReference&lt;ThreadLocal&lt;?&gt;&gt; {
+    /** The value associated with this ThreadLocal. */
+    Object value;
+
+    Entry(ThreadLocal&lt;?&gt; k, Object v) {
+        super(k);
+        value = v;
+    }
+}
+}
+</code></pre><p><strong>所以ThreadLocal是个人认为非常令人强大方便的存在。接着上面的EventBus.post()方法分析，首先拿到当前线程中的PostingThreadState对象，</strong></p>
+<pre><code> final static class PostingThreadState {
+    final List&lt;Object&gt; eventQueue = new ArrayList&lt;Object&gt;();
+    boolean isPosting;
+    boolean isMainThread;
+    Subscription subscription;
+    Object event;
+    boolean canceled;
+}
+</code></pre><p><strong>PostingThreadState对象中存储着当前线程中的几个关键状态，以及事件队列，<code>eventQueue.add(event)</code>，先将要发送的事件加入到队列中，<code>postSingleEvent(eventQueue.remove(0), postingState);</code>依次发送事件并从事件队列中移除</strong></p>
+<pre><code>private void postSingleEvent(Object event, PostingThreadState postingState) throws Error {
+    Class&lt;?&gt; eventClass = event.getClass();
+    boolean subscriptionFound = false;
+    if (eventInheritance) {
+        List&lt;Class&lt;?&gt;&gt; eventTypes = lookupAllEventTypes(eventClass);
+        int countTypes = eventTypes.size();
+        for (int h = 0; h &lt; countTypes; h++) {
+            Class&lt;?&gt; clazz = eventTypes.get(h);
+            subscriptionFound |= postSingleEventForEventType(event, postingState, clazz);
+        }
+    } else {
+        subscriptionFound = postSingleEventForEventType(event, postingState, eventClass);
+    }
+    if (!subscriptionFound) {
+        if (logNoSubscriberMessages) {
+            Log.d(TAG, &quot;No subscribers registered for event &quot; + eventClass);
+        }
+        if (sendNoSubscriberEvent &amp;&amp; eventClass != NoSubscriberEvent.class &amp;&amp;
+                eventClass != SubscriberExceptionEvent.class) {
+            post(new NoSubscriberEvent(this, event));
+        }
+    }
+}
+</code></pre><p><strong>看看<code>lookupAllEventTypes(eventClass)</code>是如何查找该事件的所有事件类型</strong></p>
+<pre><code>    private static List&lt;Class&lt;?&gt;&gt; lookupAllEventTypes(Class&lt;?&gt; eventClass) {
+    synchronized (eventTypesCache) {
+        List&lt;Class&lt;?&gt;&gt; eventTypes = eventTypesCache.get(eventClass);
+        if (eventTypes == null) {
+            eventTypes = new ArrayList&lt;&gt;();
+            Class&lt;?&gt; clazz = eventClass;
+            while (clazz != null) {
+                eventTypes.add(clazz);
+                addInterfaces(eventTypes, clazz.getInterfaces());
+                clazz = clazz.getSuperclass();
+            }
+            eventTypesCache.put(eventClass, eventTypes);
+        }
+        return eventTypes;
+    }
+}
+</code></pre><p><strong>可以看出 查找的是当前事件的类类型以及父类(包含接口)的类类型的集合，然后遍历当前事件类型集合，依次进行事件发送</strong></p>
+<pre><code>private boolean postSingleEventForEventType(Object event, PostingThreadState postingState, Class&lt;?&gt; eventClass) {
+    CopyOnWriteArrayList&lt;Subscription&gt; subscriptions;
+    synchronized (this) {
+        subscriptions = subscriptionsByEventType.get(eventClass);
+    }
+    if (subscriptions != null &amp;&amp; !subscriptions.isEmpty()) {
+        for (Subscription subscription : subscriptions) {
+            postingState.event = event;                                                        1
+            postingState.subscription = subscription;                                        2
+            boolean aborted = false;
+            try {
+                postToSubscription(subscription, event, postingState.isMainThread);
+                aborted = postingState.canceled;
+            } finally {
+                postingState.event = null;
+                postingState.subscription = null;
+                postingState.canceled = false;
+            }
+            if (aborted) {
+                break;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+</code></pre><p><strong><code>subscriptions = subscriptionsByEventType.get(eventClass);</code>找到当前事件类型的所有订阅者信息，1和2 两行是将待发送的事件以及事件的订阅者备份到当前线程中，最后通过<code>postToSubscription(subscription, event, postingState.isMainThread);</code>开始实施发送事件</strong>    </p>
+<pre><code>private void postToSubscription(Subscription subscription, Object event, boolean isMainThread) {
+    switch (subscription.subscriberMethod.threadMode) {
+        case POSTING:
+            invokeSubscriber(subscription, event);
+            break;
+        case MAIN:
+            if (isMainThread) {
+                invokeSubscriber(subscription, event);
+            } else {
+                mainThreadPoster.enqueue(subscription, event);
+            }
+            break;
+        case BACKGROUND:
+            if (isMainThread) {
+                backgroundPoster.enqueue(subscription, event);
+            } else {
+                invokeSubscriber(subscription, event);
+            }
+            break;
+        case ASYNC:
+            asyncPoster.enqueue(subscription, event);
+            break;
+        default:
+            throw new IllegalStateException(&quot;Unknown thread mode: &quot; + subscription.subscriberMethod.threadMode);
+    }
+}
+
+
+void invokeSubscriber(Subscription subscription, Object event) {
+    try {
+        subscription.subscriberMethod.method.invoke(subscription.subscriber, event);
+    } catch (InvocationTargetException e) {
+        handleSubscriberException(subscription, event, e.getCause());
+    } catch (IllegalAccessException e) {
+        throw new IllegalStateException(&quot;Unexpected exception&quot;, e);
+    }
+}
+</code></pre><p><strong>到此为止，才算真正完成了事件的发送（只能通过反射调用订阅方法进行事件发送）</strong></p>
+<pre><code>finally {
+               postingState.event = null;
+               postingState.subscription = null;
+               postingState.canceled = false;
+          }
+</code></pre><p><strong>发送完一个事件之后，会清除线程中的备份数据（刚刚发送的事件以及事件的订阅者），并重置一些状态，等待进行下一个事件的发送</strong></p>
+<hr>
+<p><strong>最后来看一下取消订阅unregister(subscriber)方法,这个就简单了</strong></p>
+<pre><code>  /** Unregisters the given subscriber from all event classes. */
+public synchronized void unregister(Object subscriber) {
+    List&lt;Class&lt;?&gt;&gt; subscribedTypes = typesBySubscriber.get(subscriber);
+    if (subscribedTypes != null) {
+        for (Class&lt;?&gt; eventType : subscribedTypes) {
+            unsubscribeByEventType(subscriber, eventType);
+        }
+        typesBySubscriber.remove(subscriber);
+    } else {
+        Log.w(TAG, &quot;Subscriber to unregister was not registered before: &quot; + subscriber.getClass());
+    }
+}
+
+  /** Only updates subscriptionsByEventType, not typesBySubscriber! Caller must update typesBySubscriber. */
+private void unsubscribeByEventType(Object subscriber, Class&lt;?&gt; eventType) {
+    List&lt;Subscription&gt; subscriptions = subscriptionsByEventType.get(eventType);
+    if (subscriptions != null) {
+        int size = subscriptions.size();
+        for (int i = 0; i &lt; size; i++) {
+            Subscription subscription = subscriptions.get(i);
+            if (subscription.subscriber == subscriber) {
+                subscription.active = false;
+                subscriptions.remove(i);
+                i--;
+                size--;
+            }
+        }
+    }
+}
+</code></pre><p><strong>就是将要取消的事件订阅者的相关信息从存储列表中进行删除</strong></p>
+<hr>
+<p><strong>至此，便简单的完成了对EventBus框架的学习，很多细节还没有研究透，回过头多研究研究，肯定会有不小的收获的</strong></p>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/源码分析/">源码分析</a></li></ul>
 	</div>
 
       
